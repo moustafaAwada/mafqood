@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -33,17 +34,24 @@ class _SplashPageState extends State<SplashPage>
   Future<void> _initApp() async {
     try {
       await context.read<AuthCubit>().initialize();
-
-      // context.read<InstituteProvider>().loadCategories();
     } catch (_) {}
 
     await Future.delayed(const Duration(seconds: 1));
 
     if (!mounted) return;
 
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+    // Navigate based on auth state: authenticated -> home (or Login for now); else -> Login
+    final isLoggedIn = context.read<AuthCubit>().state.status == AuthStatus.authenticated;
+    if (isLoggedIn) {
+      // TODO: Replace with MainScreen when available
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    }
   }
 
   @override

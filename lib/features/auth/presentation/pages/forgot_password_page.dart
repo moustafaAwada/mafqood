@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/reset_password_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -14,7 +15,6 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  bool _isLoading = false;
 
   InputDecoration getInputDecoration(String hint, IconData iconData) {
     return InputDecoration(
@@ -51,109 +51,115 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<void> _submit() async {
+    final authCubit = context.read<AuthCubit>();
+    if (authCubit.state.isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    final success = await authCubit.forgetPassword(
+      email: _emailController.text.trim(),
+    );
 
-    try {
-      final authCubit = context.read<AuthCubit>();
-      final success = await authCubit.forgetPassword(
-        email: _emailController.text.trim(),
-      );
+    if (!mounted) return;
 
-      if (!mounted) return;
-
-      if (success) {
-        // CommonFunctions.showSuccessToast(
-        //   AppLocalizations.of(context)!.emailSentSuccess,
-        // );
-        Navigator.pushReplacementNamed(context, ResetPasswordPage.routeName);
-      } else {
-        // CommonFunctions.showErrorDialog(
-        //   authCubit.state.error ?? AppLocalizations.of(context)!.authFailed,
-        //   context,
-        // );
-      }
-    } catch (e) {
-      // CommonFunctions.showErrorDialog(e.toString(), context);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    if (success) {
+      Navigator.pushReplacementNamed(context, ResetPasswordPage.routeName);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('forgotPasswordTitle'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.05),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                // child: Image.asset(
-                //   'assets/images/WhatsApp Image 2026-01-08 at 5.06.25 PM.jpeg',
-                //   height: size.height * 0.30,
-                //   width: double.infinity,
-                //   fit: BoxFit.cover,
-                //   alignment: Alignment.center,
-                // ),
-              ),
 
-              SizedBox(height: size.height * 0.05),
-              Text(
-                'enterEmailForReset',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: size.height * 0.04),
-              Form(
-                key: _formKey,
-                child: TextFormField(
-                  controller: _emailController,
-                  decoration: getInputDecoration('email', Icons.email_outlined),
-                  validator: (input) => !RegExp(r".+@.+\..+").hasMatch(input!)
-                      ? 'invalidEmail'
-                      : null,
-                ),
-              ),
-              SizedBox(height: size.height * 0.04),
-              SizedBox(
-                width: double.infinity,
-                height: size.height * 0.065,
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: _submit,
-                        child: Text(
-                          'sendCode',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
+    return BlocBuilder<AuthCubit, AuthState>(
+      buildWhen: (prev, curr) =>
+          prev.isLoading != curr.isLoading || prev.error != curr.error,
+      builder: (context, authState) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: Text('forgotPasswordTitle'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            foregroundColor: Colors.black,
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
+              child: Column(
+                children: [
+                  SizedBox(height: size.height * 0.05),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    // child: Image.asset(
+                    //   'assets/images/WhatsApp Image 2026-01-08 at 5.06.25 PM.jpeg',
+                    //   height: size.height * 0.30,
+                    //   width: double.infinity,
+                    //   fit: BoxFit.cover,
+                    //   alignment: Alignment.center,
+                    // ),
+                  ),
+
+                  SizedBox(height: size.height * 0.05),
+                  Text(
+                    'enterEmailForReset',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: size.height * 0.04),
+                  Form(
+                    key: _formKey,
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: getInputDecoration(
+                        'email',
+                        Icons.email_outlined,
+                      ),
+                      validator: (input) =>
+                          !RegExp(r".+@.+\..+").hasMatch(input!)
+                          ? 'invalidEmail'
+                          : null,
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.04),
+                  if (authState.error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        authState.error!,
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontSize: 14,
                         ),
                       ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: size.height * 0.065,
+                    child: authState.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: _submit,
+                            child: Text(
+                              'sendCode',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

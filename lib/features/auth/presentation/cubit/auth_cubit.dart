@@ -4,15 +4,15 @@ import 'package:mafqood/features/auth/domain/entities/user.dart';
 import 'package:mafqood/features/auth/domain/repositories/auth_repository.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 
-
+/// Auth Cubit – depends only on domain [AuthRepository].
+/// No Firebase/API/Hive here; all I/O goes through the repository.
+/// States use Equatable for efficient rebuilds in BlocBuilder.
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
   AuthCubit({required AuthRepository authRepository})
       : _authRepository = authRepository,
-        super(const AuthState()) {
-
-  }
+        super(const AuthState()) {}
 
   void _handleSessionExpired() {
     emit(state.copyWith(
@@ -21,7 +21,7 @@ class AuthCubit extends Cubit<AuthState> {
     ));
   }
 
-
+  /// Initialize auth state from stored session (e.g. on splash).
   Future<void> initialize() async {
     emit(state.copyWith(status: AuthStatus.loading));
 
@@ -44,8 +44,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Register a new user
-  /// On success, sets pendingUserId for email confirmation
+  /// Register a new user. On success, sets pendingUserId for email confirmation.
   Future<bool> register({
     required String name,
     required String email,
@@ -55,16 +54,15 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
-      final response = await _authRepository.register(
+      final result = await _authRepository.register(
         name: name,
         email: email,
         phoneNumber: phoneNumber,
         password: password,
       );
-
       emit(state.copyWith(
         status: AuthStatus.unauthenticated,
-        pendingUserId: response.userId,
+        pendingUserId: result.userId,
       ));
       return true;
     } catch (e) {
@@ -76,13 +74,13 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Resend confirmation code
-  /// On success, sets pendingUserId
+  /// Resend confirmation code. On success, sets pendingUserId.
   Future<bool> resendConfirmationEmail({required String email}) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
-      final userId = await _authRepository.resendConfirmationEmail(email: email);
+      final userId =
+          await _authRepository.resendConfirmationEmail(email: email);
       emit(state.copyWith(
         status: AuthStatus.unauthenticated,
         pendingUserId: userId,
@@ -97,8 +95,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Confirm email with OTP code
-  /// On success, user is logged in
+  /// Confirm email with OTP. On success, user is logged in.
   Future<bool> confirmEmail({required String code}) async {
     if (state.pendingUserId == null) {
       emit(state.copyWith(
@@ -111,18 +108,17 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
-      final response = await _authRepository.confirmEmail(
+      final result = await _authRepository.confirmEmail(
         userId: state.pendingUserId!,
         code: code,
       );
-
       emit(state.copyWith(
         status: AuthStatus.authenticated,
         user: User(
-          id: response.id,
-          email: response.email,
-          name: response.name,
-          phoneNumber: response.phoneNumber,
+          id: result.id,
+          email: result.email,
+          name: result.name,
+          phoneNumber: result.phoneNumber,
         ),
         clearPendingUserId: true,
       ));
@@ -136,7 +132,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Login with email and password
+  /// Login with email and password.
   Future<bool> login({
     required String email,
     required String password,
@@ -144,29 +140,26 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
-      final response = await _authRepository.login(
+      final result = await _authRepository.login(
         email: email,
         password: password,
       );
-
       emit(state.copyWith(
         status: AuthStatus.authenticated,
         user: User(
-          id: response.id,
-          email: response.email,
-          name: response.name,
-          phoneNumber: response.phoneNumber,
+          id: result.id,
+          email: result.email,
+          name: result.name,
+          phoneNumber: result.phoneNumber,
         ),
       ));
       return true;
     } catch (e) {
       final errorMsg = _extractErrorMessage(e);
-      // Preserve the device-not-recognized Arabic message
       final displayError = errorMsg.contains(
               'The device you are trying to login from is not recognized')
           ? 'عذراً، هذا الجهاز غير معروف. يرجى تسجيل الدخول من جهازك المسجل أو إخبار مسؤولين السنتر بالمشكلة'
           : errorMsg;
-
       emit(state.copyWith(
         status: AuthStatus.error,
         error: displayError,
@@ -175,16 +168,15 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Request password reset OTP
-  /// On success, sets pendingEmail for reset flow
+  /// Request password reset OTP. On success, sets pendingEmail.
   Future<bool> forgetPassword({required String email}) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
-      final response = await _authRepository.forgetPassword(email: email);
+      final result = await _authRepository.forgetPassword(email: email);
       emit(state.copyWith(
         status: AuthStatus.unauthenticated,
-        pendingEmail: response.email,
+        pendingEmail: result.email,
       ));
       return true;
     } catch (e) {
@@ -196,7 +188,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Reset password with OTP code
+  /// Reset password with OTP and new password.
   Future<bool> resetPassword({
     required String code,
     required String newPassword,
@@ -217,7 +209,6 @@ class AuthCubit extends Cubit<AuthState> {
         code: code,
         newPassword: newPassword,
       );
-
       emit(state.copyWith(
         status: AuthStatus.unauthenticated,
         clearPendingEmail: true,
@@ -232,10 +223,9 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Logout and clear all data
+  /// Logout and clear stored auth data.
   Future<void> logout() async {
     emit(state.copyWith(status: AuthStatus.loading));
-
     try {
       await _authRepository.logout();
     } catch (_) {
@@ -245,25 +235,15 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Clear error
-  void clearError() {
-    emit(state.copyWith(clearError: true));
-  }
+  void clearError() => emit(state.copyWith(clearError: true));
+  void setPendingUserId(String userId) =>
+      emit(state.copyWith(pendingUserId: userId));
+  void setPendingEmail(String email) =>
+      emit(state.copyWith(pendingEmail: email));
 
-  /// Set pending userId (for navigation from signup)
-  void setPendingUserId(String userId) {
-    emit(state.copyWith(pendingUserId: userId));
-  }
-
-  /// Set pending email (for navigation from forgot password)
-  void setPendingEmail(String email) {
-    emit(state.copyWith(pendingEmail: email));
-  }
-
-  /// Update local user data (called after profile update)
+  /// Update local user data (e.g. after profile update).
   void updateUser({String? name, String? phoneNumber}) {
     if (state.user.isEmpty) return;
-
     emit(state.copyWith(
       user: User(
         id: state.user.id,
@@ -274,11 +254,7 @@ class AuthCubit extends Cubit<AuthState> {
     ));
   }
 
-  // ============ Private Helpers ============
-
   String _extractErrorMessage(Object e) {
-    // TODO: When your ApiException / ValidationException are available,
-    // add specific catch blocks here or handle in the calling methods.
     return e.toString();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -14,9 +15,8 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   bool _hidePassword = true;
-  bool _isLoading = false;
 
-  final Color primaryColor = const Color(0xFFF9C000);
+  final Color primaryColor = Colors.lightBlue;
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -33,45 +33,24 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _submit() async {
+    final authCubit = context.read<AuthCubit>();
+    if (authCubit.state.isLoading) return;
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    setState(() => _isLoading = true);
+    final success = await authCubit.register(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      phoneNumber: _phoneController.text.trim(),
+    );
 
-    try {
-      final authCubit = context.read<AuthCubit>();
+    if (!mounted) return;
 
-      final success = await authCubit.register(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        phoneNumber: _phoneController.text.trim(),
+    if (success) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const ConfirmationEmailPage()),
       );
-
-      if (!mounted) return;
-
-      if (success) {
-        // CommonFunctions.showSuccessToast(
-        // AppLocalizations.of(context)!.signupSuccessful,
-        // );
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const ConfirmationEmailPage(),
-          ),
-        );
-      } else {
-        // CommonFunctions.showErrorDialog(
-        //   authCubit.state.error ?? AppLocalizations.of(context)!.couldNotRegister,
-        //   context,
-        // );
-      }
-    } catch (error) {
-      // CommonFunctions.showErrorDialog(
-      //   AppLocalizations.of(context)!.couldNotRegister,
-      //   context,
-      // );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -105,155 +84,175 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      // backgroundColor: kBackgroundColor,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ClipPath(
-              clipper: _HeaderClipper(),
-              child: Container(
-                height: 220,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [primaryColor, primaryColor.withOpacity(0.8)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+    return BlocBuilder<AuthCubit, AuthState>(
+      buildWhen: (prev, curr) =>
+          prev.isLoading != curr.isLoading || prev.error != curr.error,
+      builder: (context, authState) {
+        return Scaffold(
+          // backgroundColor: kBackgroundColor,
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                ClipPath(
+                  clipper: _HeaderClipper(),
+                  child: Container(
+                    height: 220,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'signUpTitle',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
+                      ),
+                    ),
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  'signUpTitle',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 10,
                   ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 10,
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: _inputDecoration(
-                        'الاسم كاملاً',
-                        Icons.person_outline,
-                      ),
-                      validator: (v) => v!.isEmpty ? 'firstNameRequired' : null,
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: _inputDecoration(
-                        'phone',
-                        Icons.phone_android_outlined,
-                      ),
-                      keyboardType: TextInputType.phone,
-                      validator: (v) => v!.isEmpty ? 'phoneRequired' : null,
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: _inputDecoration(
-                        'email',
-                        Icons.email_outlined,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (v) =>
-                          !RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(v!)
-                          ? 'emailInvalid'
-                          : null,
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _hidePassword,
-                      decoration:
-                          _inputDecoration(
-                            'password',
-                            Icons.lock_outline,
-                          ).copyWith(
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _hidePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () => setState(
-                                () => _hidePassword = !_hidePassword,
-                              ),
-                            ),
-                          ),
-                      validator: (v) =>
-                          v!.length < 6 ? 'passwordTooShortSignup' : null,
-                    ),
-                    const SizedBox(height: 30),
-                    _isLoading
-                        ? CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(primaryColor),
-                          )
-                        : SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _submit,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                backgroundColor: primaryColor,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text(
-                                'signUp',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors
-                                      .black87, // Darker text for better contrast on yellow
-                                ),
-                              ),
-                            ),
-                          ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
                       children: [
-                        Text('alreadyHaveAccount'),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(
-                            'signIn',
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: _inputDecoration(
+                            'الاسم كاملاً',
+                            Icons.person_outline,
+                          ),
+                          validator: (v) =>
+                              v!.isEmpty ? 'firstNameRequired' : null,
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _phoneController,
+                          decoration: _inputDecoration(
+                            'phone',
+                            Icons.phone_android_outlined,
+                          ),
+                          keyboardType: TextInputType.phone,
+                          validator: (v) => v!.isEmpty ? 'phoneRequired' : null,
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: _inputDecoration(
+                            'email',
+                            Icons.email_outlined,
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) =>
+                              !RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              ).hasMatch(v!)
+                              ? 'emailInvalid'
+                              : null,
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _hidePassword,
+                          decoration:
+                              _inputDecoration(
+                                'password',
+                                Icons.lock_outline,
+                              ).copyWith(
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _hidePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: Colors.grey,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _hidePassword = !_hidePassword,
+                                  ),
+                                ),
+                              ),
+                          validator: (v) =>
+                              v!.length < 6 ? 'passwordTooShortSignup' : null,
+                        ),
+                        if (authState.error != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              authState.error!,
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
+                        ],
+                        const SizedBox(height: 30),
+                        authState.isLoading
+                            ? CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation(
+                                  primaryColor,
+                                ),
+                              )
+                            : SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _submit,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    backgroundColor: primaryColor,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'signUp',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .black87, // Darker text for better contrast on yellow
+                                    ),
+                                  ),
+                                ),
+                              ),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('alreadyHaveAccount'),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text(
+                                'signIn',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

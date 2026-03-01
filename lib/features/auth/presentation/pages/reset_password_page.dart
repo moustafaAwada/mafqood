@@ -17,7 +17,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  bool _isLoading = false;
   bool _hidePassword = true;
 
   InputDecoration getInputDecoration(String hint, IconData iconData) {
@@ -56,138 +55,143 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
 
   Future<void> _submit() async {
+    final authCubit = context.read<AuthCubit>();
+    if (authCubit.state.isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    final success = await authCubit.resetPassword(
+      code: _otpController.text.trim(),
+      newPassword: _passwordController.text.trim(),
+    );
 
-    try {
-      final authCubit = context.read<AuthCubit>();
-      final success = await authCubit.resetPassword(
-        code: _otpController.text.trim(),
-        newPassword: _passwordController.text.trim(),
-      );
+    if (!mounted) return;
 
-      if (!mounted) return;
-
-      if (success) {
-        // CommonFunctions.showSuccessToast("تم إعادة تعيين كلمة المرور بنجاح");
-        Navigator.popUntil(context, (route) => route.isFirst);
-      } else {
-        // CommonFunctions.showErrorDialog(
-        // authCubit.state.error ?? "OTP غير صحيح",
-        // context,
-        // );
-      }
-    } catch (e) {
-      // CommonFunctions.showErrorDialog(e.toString(), context);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    if (success) {
+      Navigator.popUntil(context, (route) => route.isFirst);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pendingEmail = context.watch<AuthCubit>().state.pendingEmail ?? '';
     final size = MediaQuery.of(context).size;
-    // final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        // title: Text(resetPassword),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.02),
-              Text(
-                pendingEmail,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: size.height * 0.04),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _otpController,
-                      keyboardType: TextInputType.number,
-                      decoration: getInputDecoration(
-                        'otpLabel',
-                        Icons.security,
-                      ),
-                      validator: (input) => input!.isEmpty ? 'enterOtp' : null,
-                    ),
-                    SizedBox(height: size.height * 0.02),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _hidePassword,
-                      decoration: getInputDecoration('newPassword', Icons.lock)
-                          .copyWith(
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _hidePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, authState) {
+        final pendingEmail = authState.pendingEmail ?? '';
+        return Scaffold(
+          appBar: AppBar(
+            // title: Text(resetPassword),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            foregroundColor: Colors.black,
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
+              child: Column(
+                children: [
+                  SizedBox(height: size.height * 0.02),
+                  Text(
+                    pendingEmail,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: size.height * 0.04),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _otpController,
+                          keyboardType: TextInputType.number,
+                          decoration: getInputDecoration(
+                            'otpLabel',
+                            Icons.security,
+                          ),
+                          validator: (input) =>
+                              input!.isEmpty ? 'enterOtp' : null,
+                        ),
+                        SizedBox(height: size.height * 0.02),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _hidePassword,
+                          decoration:
+                              getInputDecoration(
+                                'newPassword',
+                                Icons.lock,
+                              ).copyWith(
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _hidePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _hidePassword = !_hidePassword,
+                                  ),
+                                ),
                               ),
-                              onPressed: () => setState(
-                                () => _hidePassword = !_hidePassword,
+                          validator: (input) =>
+                              input!.length < 3 ? 'passwordTooShort' : null,
+                        ),
+                        SizedBox(height: size.height * 0.02),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: _hidePassword,
+                          decoration: getInputDecoration(
+                            'confirmPassword',
+                            Icons.lock,
+                          ),
+                          validator: (input) {
+                            if (input != _passwordController.text) {
+                              return 'passwordsDoNotMatch';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (authState.error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        authState.error!,
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: size.height * 0.04),
+                  SizedBox(
+                    width: double.infinity,
+                    height: size.height * 0.065,
+                    child: authState.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: _submit,
+                            child: Text(
+                              'resetPassword',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
                               ),
                             ),
                           ),
-                      validator: (input) =>
-                          input!.length < 3 ? 'passwordTooShort' : null,
-                    ),
-                    SizedBox(height: size.height * 0.02),
-                    TextFormField(
-                      controller: _confirmPasswordController,
-                      obscureText: _hidePassword,
-                      decoration: getInputDecoration(
-                        'confirmPassword',
-                        Icons.lock,
-                      ),
-                      validator: (input) {
-                        if (input != _passwordController.text) {
-                          return 'passwordsDoNotMatch';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox(height: size.height * 0.04),
-              SizedBox(
-                width: double.infinity,
-                height: size.height * 0.065,
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: _submit,
-                        child: Text(
-                          'resetPassword',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

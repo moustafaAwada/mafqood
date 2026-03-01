@@ -1,8 +1,7 @@
-import 'package:mafqood/features/auth/data/models/auth_models.dart';
-
+import 'package:mafqood/features/auth/domain/entities/auth_results.dart';
 
 abstract class AuthRepository {
-  Future<RegisterResponse> register({
+  Future<RegisterResult> register({
     required String name,
     required String email,
     required String phoneNumber,
@@ -11,17 +10,17 @@ abstract class AuthRepository {
 
   Future<String> resendConfirmationEmail({required String email});
 
-  Future<AuthResponse> confirmEmail({
+  Future<AuthUserResult> confirmEmail({
     required String userId,
     required String code,
   });
 
-  Future<AuthResponse> login({
+  Future<AuthUserResult> login({
     required String email,
     required String password,
   });
 
-  Future<ForgetPasswordResponse> forgetPassword({required String email});
+  Future<ForgetPasswordResult> forgetPassword({required String email});
 
   Future<void> resetPassword({
     required String email,
