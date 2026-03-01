@@ -158,22 +158,13 @@ class _SignUpPageState extends State<SignUpPage> {
                           TextFormField(
                             controller: _firstNameController,
                             decoration: _inputDecoration(
-                              'الاسم الأول',
+                              'الاسم كاملاً',
                               Icons.person_outline,
                             ),
                             validator: (v) =>
                                 (v ?? '').isEmpty ? 'الاسم مطلوب' : null,
                           ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _lastNameController,
-                            decoration: _inputDecoration(
-                              'اسم العائلة',
-                              Icons.person_outline,
-                            ),
-                            validator: (v) =>
-                                (v ?? '').isEmpty ? 'اسم العائلة مطلوب' : null,
-                          ),
+
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _emailController,

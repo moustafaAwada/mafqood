@@ -4,24 +4,17 @@ import 'package:mafqood/features/auth/domain/entities/user.dart';
 import 'package:mafqood/features/auth/domain/repositories/auth_repository.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 
-/// Auth Cubit – depends only on domain [AuthRepository].
-/// No Firebase/API/Hive here; all I/O goes through the repository.
-/// States use Equatable for efficient rebuilds in BlocBuilder.
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
   AuthCubit({required AuthRepository authRepository})
-      : _authRepository = authRepository,
-        super(const AuthState()) {}
+    : _authRepository = authRepository,
+      super(const AuthState());
 
   void _handleSessionExpired() {
-    emit(state.copyWith(
-      user: User.empty,
-      status: AuthStatus.unauthenticated,
-    ));
+    emit(state.copyWith(user: User.empty, status: AuthStatus.unauthenticated));
   }
 
-  /// Initialize auth state from stored session (e.g. on splash).
   Future<void> initialize() async {
     emit(state.copyWith(status: AuthStatus.loading));
 
@@ -30,10 +23,12 @@ class AuthCubit extends Cubit<AuthState> {
       if (isLoggedIn) {
         final userData = await _authRepository.getStoredUserData();
         if (userData != null) {
-          emit(state.copyWith(
-            status: AuthStatus.authenticated,
-            user: User.fromJson(userData),
-          ));
+          emit(
+            state.copyWith(
+              status: AuthStatus.authenticated,
+              user: User.fromJson(userData),
+            ),
+          );
           return;
         }
       }
@@ -44,7 +39,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Register a new user. On success, sets pendingUserId for email confirmation.
   Future<bool> register({
     required String name,
     required String email,
@@ -60,48 +54,57 @@ class AuthCubit extends Cubit<AuthState> {
         phoneNumber: phoneNumber,
         password: password,
       );
-      emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
-        pendingUserId: result.userId,
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          pendingUserId: result.userId,
+        ),
+      );
       return true;
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: _extractErrorMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: _extractErrorMessage(e),
+        ),
+      );
       return false;
     }
   }
 
-  /// Resend confirmation code. On success, sets pendingUserId.
   Future<bool> resendConfirmationEmail({required String email}) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
-      final userId =
-          await _authRepository.resendConfirmationEmail(email: email);
-      emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
-        pendingUserId: userId,
-      ));
+      final userId = await _authRepository.resendConfirmationEmail(
+        email: email,
+      );
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          pendingUserId: userId,
+        ),
+      );
       return true;
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: _extractErrorMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: _extractErrorMessage(e),
+        ),
+      );
       return false;
     }
   }
 
-  /// Confirm email with OTP. On success, user is logged in.
   Future<bool> confirmEmail({required String code}) async {
     if (state.pendingUserId == null) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'لا يوجد مستخدم في انتظار التأكيد',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'لا يوجد مستخدم في انتظار التأكيد',
+        ),
+      );
       return false;
     }
 
@@ -112,31 +115,31 @@ class AuthCubit extends Cubit<AuthState> {
         userId: state.pendingUserId!,
         code: code,
       );
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: User(
-          id: result.id,
-          email: result.email,
-          name: result.name,
-          phoneNumber: result.phoneNumber,
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: User(
+            id: result.id,
+            email: result.email,
+            name: result.name,
+            phoneNumber: result.phoneNumber,
+          ),
+          clearPendingUserId: true,
         ),
-        clearPendingUserId: true,
-      ));
+      );
       return true;
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: _extractErrorMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: _extractErrorMessage(e),
+        ),
+      );
       return false;
     }
   }
 
-  /// Login with email and password.
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
@@ -144,60 +147,65 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
       );
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: User(
-          id: result.id,
-          email: result.email,
-          name: result.name,
-          phoneNumber: result.phoneNumber,
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: User(
+            id: result.id,
+            email: result.email,
+            name: result.name,
+            phoneNumber: result.phoneNumber,
+          ),
         ),
-      ));
+      );
       return true;
     } catch (e) {
       final errorMsg = _extractErrorMessage(e);
-      final displayError = errorMsg.contains(
-              'The device you are trying to login from is not recognized')
+      final displayError =
+          errorMsg.contains(
+            'The device you are trying to login from is not recognized',
+          )
           ? 'عذراً، هذا الجهاز غير معروف. يرجى تسجيل الدخول من جهازك المسجل أو إخبار مسؤولين السنتر بالمشكلة'
           : errorMsg;
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: displayError,
-      ));
+      emit(state.copyWith(status: AuthStatus.error, error: displayError));
       return false;
     }
   }
 
-  /// Request password reset OTP. On success, sets pendingEmail.
   Future<bool> forgetPassword({required String email}) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
 
     try {
       final result = await _authRepository.forgetPassword(email: email);
-      emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
-        pendingEmail: result.email,
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          pendingEmail: result.email,
+        ),
+      );
       return true;
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: _extractErrorMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: _extractErrorMessage(e),
+        ),
+      );
       return false;
     }
   }
 
-  /// Reset password with OTP and new password.
   Future<bool> resetPassword({
     required String code,
     required String newPassword,
   }) async {
     if (state.pendingEmail == null) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'لا يوجد بريد إلكتروني في انتظار إعادة التعيين',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'لا يوجد بريد إلكتروني في انتظار إعادة التعيين',
+        ),
+      );
       return false;
     }
 
@@ -209,27 +217,29 @@ class AuthCubit extends Cubit<AuthState> {
         code: code,
         newPassword: newPassword,
       );
-      emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
-        clearPendingEmail: true,
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          clearPendingEmail: true,
+        ),
+      );
       return true;
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: _extractErrorMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: _extractErrorMessage(e),
+        ),
+      );
       return false;
     }
   }
 
-  /// Logout and clear stored auth data.
   Future<void> logout() async {
     emit(state.copyWith(status: AuthStatus.loading));
     try {
       await _authRepository.logout();
     } catch (_) {
-      // Ignore errors during logout
     } finally {
       emit(const AuthState(status: AuthStatus.unauthenticated));
     }
@@ -241,17 +251,18 @@ class AuthCubit extends Cubit<AuthState> {
   void setPendingEmail(String email) =>
       emit(state.copyWith(pendingEmail: email));
 
-  /// Update local user data (e.g. after profile update).
   void updateUser({String? name, String? phoneNumber}) {
     if (state.user.isEmpty) return;
-    emit(state.copyWith(
-      user: User(
-        id: state.user.id,
-        email: state.user.email,
-        name: name ?? state.user.name,
-        phoneNumber: phoneNumber ?? state.user.phoneNumber,
+    emit(
+      state.copyWith(
+        user: User(
+          id: state.user.id,
+          email: state.user.email,
+          name: name ?? state.user.name,
+          phoneNumber: phoneNumber ?? state.user.phoneNumber,
+        ),
       ),
-    ));
+    );
   }
 
   String _extractErrorMessage(Object e) {
