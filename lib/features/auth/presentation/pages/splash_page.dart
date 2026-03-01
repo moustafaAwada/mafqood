@@ -71,8 +71,8 @@ class _SplashPageState extends State<SplashPage>
             children: [
               Image.asset(
                 'assets/images/logo.jpg',
-                width: 200,
-                height: 200,
+                width: 300,
+                height: 300,
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 12),

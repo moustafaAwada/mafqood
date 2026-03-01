@@ -17,7 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool hidePassword = true;
-  bool _rememberMe = false;
+  final bool _rememberMe = false;
 
   final Map<String, String> _authData = {'email': '', 'password': ''};
 
@@ -132,20 +132,6 @@ class _LoginPageState extends State<LoginPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    value: _rememberMe,
-                                    activeColor: const Color(0xFF00AEEF),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        _rememberMe = val ?? false;
-                                      });
-                                    },
-                                  ),
-                                  const Text('تذكرني لاحقاً'),
-                                ],
-                              ),
                               TextButton(
                                 onPressed: () => Navigator.pushNamed(
                                   context,
