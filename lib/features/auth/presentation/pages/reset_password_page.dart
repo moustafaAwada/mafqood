@@ -75,123 +75,149 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return BlocBuilder<AuthCubit, AuthState>(
-      builder: (context, authState) {
-        final pendingEmail = authState.pendingEmail ?? '';
-        return Scaffold(
-          appBar: AppBar(
-            // title: Text(resetPassword),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            foregroundColor: Colors.black,
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
-              child: Column(
-                children: [
-                  SizedBox(height: size.height * 0.02),
-                  Text(
-                    pendingEmail,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: size.height * 0.04),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: _otpController,
-                          keyboardType: TextInputType.number,
-                          decoration: getInputDecoration(
-                            'otpLabel',
-                            Icons.security,
-                          ),
-                          validator: (input) =>
-                              input!.isEmpty ? 'enterOtp' : null,
-                        ),
-                        SizedBox(height: size.height * 0.02),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _hidePassword,
-                          decoration:
-                              getInputDecoration(
-                                'newPassword',
-                                Icons.lock,
-                              ).copyWith(
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _hidePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                  ),
-                                  onPressed: () => setState(
-                                    () => _hidePassword = !_hidePassword,
-                                  ),
-                                ),
-                              ),
-                          validator: (input) =>
-                              input!.length < 3 ? 'passwordTooShort' : null,
-                        ),
-                        SizedBox(height: size.height * 0.02),
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          obscureText: _hidePassword,
-                          decoration: getInputDecoration(
-                            'confirmPassword',
-                            Icons.lock,
-                          ),
-                          validator: (input) {
-                            if (input != _passwordController.text) {
-                              return 'passwordsDoNotMatch';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, authState) {
+          final pendingEmail = authState.pendingEmail ?? '';
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: Colors.black,
+            ),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: size.height * 0.02),
+                    Image.asset(
+                      'assets/images/forgetPassword.png',
+                      height: size.height * 0.26,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  if (authState.error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        authState.error!,
-                        style: TextStyle(
-                          color: Colors.red.shade700,
-                          fontSize: 14,
-                        ),
+                    SizedBox(height: size.height * 0.04),
+                    const Text(
+                      'إنشاء كلمة مرور جديدة',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  SizedBox(height: size.height * 0.04),
-                  SizedBox(
-                    width: double.infinity,
-                    height: size.height * 0.065,
-                    child: authState.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'قم بإدخال كلمة المرور الجديدة',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: size.height * 0.02),
+                    if (pendingEmail.isNotEmpty)
+                      Text(
+                        pendingEmail,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    SizedBox(height: size.height * 0.03),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _otpController,
+                            keyboardType: TextInputType.number,
+                            decoration: getInputDecoration(
+                              'الرمز المرسل إليك',
+                              Icons.security,
                             ),
-                            onPressed: _submit,
-                            child: Text(
-                              'resetPassword',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
+                            validator: (input) =>
+                                (input ?? '').isEmpty ? 'أدخل الرمز' : null,
                           ),
-                  ),
-                ],
+                          SizedBox(height: size.height * 0.02),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _hidePassword,
+                            decoration:
+                                getInputDecoration(
+                                  'كلمة المرور الجديدة',
+                                  Icons.lock,
+                                ).copyWith(
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _hidePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                    ),
+                                    onPressed: () => setState(
+                                      () => _hidePassword = !_hidePassword,
+                                    ),
+                                  ),
+                                ),
+                            validator: (input) =>
+                                (input ?? '').length < 3
+                                    ? 'كلمة المرور قصيرة جداً'
+                                    : null,
+                          ),
+                          SizedBox(height: size.height * 0.02),
+                          TextFormField(
+                            controller: _confirmPasswordController,
+                            obscureText: _hidePassword,
+                            decoration: getInputDecoration(
+                              'تأكيد كلمة المرور',
+                              Icons.lock,
+                            ),
+                            validator: (input) {
+                              if (input != _passwordController.text) {
+                                return 'كلمتا المرور غير متطابقتين';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (authState.error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          authState.error!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    SizedBox(height: size.height * 0.04),
+                    SizedBox(
+                      width: double.infinity,
+                      height: size.height * 0.065,
+                      child: authState.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF00AEEF),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: _submit,
+                              child: const Text(
+                                'حفظ',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

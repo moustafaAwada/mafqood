@@ -40,17 +40,16 @@ class _SplashPageState extends State<SplashPage>
 
     if (!mounted) return;
 
-    // Navigate based on auth state: authenticated -> home (or Login for now); else -> Login
-    final isLoggedIn = context.read<AuthCubit>().state.status == AuthStatus.authenticated;
+    final isLoggedIn =
+        context.read<AuthCubit>().state.status == AuthStatus.authenticated;
     if (isLoggedIn) {
-      // TODO: Replace with MainScreen when available
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
     }
   }
 
@@ -62,7 +61,6 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
-    // final loc = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -71,11 +69,12 @@ class _SplashPageState extends State<SplashPage>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Image.asset(
-              //   'assets/images/edited-photo.png',
-              //   width: 140,
-              //   height: 140,
-              // ),
+              Image.asset(
+                'assets/images/logo.jpg',
+                width: 200,
+                height: 200,
+                fit: BoxFit.contain,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Mafqood',

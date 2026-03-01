@@ -70,96 +70,95 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return BlocBuilder<AuthCubit, AuthState>(
-      buildWhen: (prev, curr) =>
-          prev.isLoading != curr.isLoading || prev.error != curr.error,
-      builder: (context, authState) {
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            title: Text('forgotPasswordTitle'),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            foregroundColor: Colors.black,
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
-              child: Column(
-                children: [
-                  SizedBox(height: size.height * 0.05),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    // child: Image.asset(
-                    //   'assets/images/WhatsApp Image 2026-01-08 at 5.06.25 PM.jpeg',
-                    //   height: size.height * 0.30,
-                    //   width: double.infinity,
-                    //   fit: BoxFit.cover,
-                    //   alignment: Alignment.center,
-                    // ),
-                  ),
-
-                  SizedBox(height: size.height * 0.05),
-                  Text(
-                    'enterEmailForReset',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: size.height * 0.04),
-                  Form(
-                    key: _formKey,
-                    child: TextFormField(
-                      controller: _emailController,
-                      decoration: getInputDecoration(
-                        'email',
-                        Icons.email_outlined,
-                      ),
-                      validator: (input) =>
-                          !RegExp(r".+@.+\..+").hasMatch(input!)
-                          ? 'invalidEmail'
-                          : null,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: BlocBuilder<AuthCubit, AuthState>(
+        buildWhen: (prev, curr) =>
+            prev.isLoading != curr.isLoading || prev.error != curr.error,
+        builder: (context, authState) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: Colors.black,
+              title: const Text('نسيت كلمة المرور'),
+              centerTitle: true,
+            ),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: size.width * 0.07),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: size.height * 0.04),
+                    Image.asset(
+                      'assets/images/forgetPassword.png',
+                      height: size.height * 0.26,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  SizedBox(height: size.height * 0.04),
-                  if (authState.error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        authState.error!,
-                        style: TextStyle(
-                          color: Colors.red.shade700,
-                          fontSize: 14,
+                    SizedBox(height: size.height * 0.05),
+                    const Text(
+                      'ادخل البريد الإلكتروني المسجل ليتم إرسال رمز إعادة تعيين كلمة المرور.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: size.height * 0.04),
+                    Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        controller: _emailController,
+                        decoration: getInputDecoration(
+                          'البريد الإلكتروني',
+                          Icons.email_outlined,
+                        ),
+                        validator: (input) =>
+                            !RegExp(r".+@.+\..+").hasMatch(input ?? '')
+                                ? 'بريد إلكتروني غير صالح'
+                                : null,
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.04),
+                    if (authState.error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          authState.error!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
+                    SizedBox(
+                      width: double.infinity,
+                      height: size.height * 0.065,
+                      child: authState.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF00AEEF),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: _submit,
+                              child: const Text(
+                                'إرسال الرمز',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                     ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: size.height * 0.065,
-                    child: authState.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            onPressed: _submit,
-                            child: Text(
-                              'sendCode',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -30,6 +30,7 @@ class MafqoodApp extends StatelessWidget {
         create: (context) =>
             AuthCubit(authRepository: context.read<AuthRepository>()),
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           home: const SplashPage(),
           routes: {
             SignUpPage.routeName: (ctx) => const SignUpPage(),
