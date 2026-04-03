@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
+import 'package:mafqood/features/main/main_shell_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -43,13 +44,14 @@ class _SplashPageState extends State<SplashPage>
     final isLoggedIn =
         context.read<AuthCubit>().state.status == AuthStatus.authenticated;
     if (isLoggedIn) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainShellPage()),
+      );
     } else {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainShellPage()),
+      );
+      // ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
     }
   }
 
