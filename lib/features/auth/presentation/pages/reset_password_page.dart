@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 
@@ -154,10 +155,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                     ),
                                   ),
                                 ),
-                            validator: (input) =>
-                                (input ?? '').length < 3
-                                    ? 'كلمة المرور قصيرة جداً'
-                                    : null,
+                            validator: (input) => (input ?? '').length < 3
+                                ? 'كلمة المرور قصيرة جداً'
+                                : null,
                           ),
                           SizedBox(height: size.height * 0.02),
                           TextFormField(
@@ -196,7 +196,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ? const Center(child: CircularProgressIndicator())
                           : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00AEEF),
+                                backgroundColor: kPrimaryColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/account/account_page.dart';
 import 'package:mafqood/features/chat/presentation/chat_page.dart';
 import 'package:mafqood/features/home/home_page.dart';
@@ -39,7 +40,7 @@ class _MainShellPageState extends State<MainShellPage> {
       onTap: (i) => setState(() => _currentIndex = i),
       type: BottomNavigationBarType.fixed,
       backgroundColor: Colors.white,
-      selectedItemColor: const Color(0xFF00AEEF),
+      selectedItemColor: kPrimaryColor,
       unselectedItemColor: Colors.black54,
       showUnselectedLabels: true,
       items: const [

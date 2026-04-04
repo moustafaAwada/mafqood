@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/chat/presentation/chat_conversation_page.dart';
 
 class ChatPage extends StatelessWidget {
@@ -8,12 +9,9 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00AEEF),
+        backgroundColor: kPrimaryColor,
         elevation: 0,
-        title: const Text(
-          'الدردشة',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('الدردشة', style: TextStyle(color: Colors.white)),
         actions: const [
           Icon(Icons.search, color: Colors.white),
           SizedBox(width: 16),
@@ -74,11 +72,13 @@ class _ChatItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF00AEEF)),
+          border: Border.all(color: kPrimaryColor),
         ),
         child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
           leading: CircleAvatar(
             backgroundColor: const Color(0xFFE0F7FA),
             child: Text(name.characters.first.toUpperCase()),
@@ -89,21 +89,15 @@ class _ChatItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                time,
-                style: const TextStyle(fontSize: 11),
-              ),
+              Text(time, style: const TextStyle(fontSize: 11)),
               const SizedBox(height: 4),
               if (unreadCount > 0)
                 CircleAvatar(
                   radius: 10,
-                  backgroundColor: const Color(0xFF00AEEF),
+                  backgroundColor: kPrimaryColor,
                   child: Text(
                     '$unreadCount',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 11),
                   ),
                 ),
             ],
@@ -113,4 +107,3 @@ class _ChatItem extends StatelessWidget {
     );
   }
 }
-

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
@@ -265,7 +266,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   child: ElevatedButton(
                                     onPressed: _submit,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF00AEEF),
+                                      backgroundColor: kPrimaryColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
@@ -287,9 +288,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             child: OutlinedButton.icon(
                               onPressed: () {},
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: Color(0xFF00AEEF),
-                                ),
+                                side: const BorderSide(color: kPrimaryColor),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),

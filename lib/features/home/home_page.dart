@@ -1,6 +1,127 @@
 import 'package:flutter/material.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/home/presentation/pages/create_post_page.dart';
 import 'package:mafqood/features/home/presentation/widgets/comments_bottom_sheet.dart';
+
+void _showPostTypeSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (_) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'اختر نوع المنشور',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _PostTypeOption(
+                  label: 'مفقود',
+                  icon: Icons.help_outline,
+                  color: const Color(0xFFFF5252),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const CreatePostPage(postType: PostType.mafqood),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _PostTypeOption(
+                  label: 'موجود',
+                  icon: Icons.location_on_outlined,
+                  color: const Color(0xFF4CAF50),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const CreatePostPage(postType: PostType.mawjood),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
+}
+
+class _PostTypeOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _PostTypeOption({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: color.withOpacity(0.15),
+              child: Icon(icon, color: color, size: 26),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,24 +131,16 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00AEEF),
+        backgroundColor: kPrimaryColor,
         elevation: 0,
         title: const Text(
           'مفقود',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreatePostPage()),
-          );
-        },
-        backgroundColor: const Color(0xFF00AEEF),
+        onPressed: () => _showPostTypeSheet(context),
+        backgroundColor: kPrimaryColor,
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: SingleChildScrollView(
@@ -36,13 +149,7 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CreatePostPage()),
-                );
-              },
+              onTap: () => _showPostTypeSheet(context),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
@@ -53,10 +160,7 @@ class HomePage extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Icon(
-                    Icons.add_circle_outline,
-                    color: Color(0xFF00AEEF),
-                  ),
+                  Icon(Icons.add_circle_outline, color: kPrimaryColor),
                 ],
               ),
             ),
@@ -88,7 +192,7 @@ class HomePage extends StatelessWidget {
                 _StatusChip(
                   label: 'موجود',
                   count: '9,234',
-                  color: Color(0xFF00AEEF),
+                  color: kPrimaryColor,
                   icon: Icons.location_on_outlined,
                 ),
                 _StatusChip(
@@ -151,10 +255,7 @@ class _StatusChip extends StatelessWidget {
               child: Icon(icon, color: color, size: 18),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 2),
             Text(
               count,
@@ -262,8 +363,10 @@ class _PostCardState extends State<_PostCard> {
             child: Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: widget.statusColor,
                     borderRadius: BorderRadius.circular(6),
@@ -284,9 +387,7 @@ class _PostCardState extends State<_PostCard> {
                     children: [
                       Text(
                         widget.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         widget.subtitle,
@@ -297,20 +398,15 @@ class _PostCardState extends State<_PostCard> {
                     ],
                   ),
                 ),
-                const CircleAvatar(
-                  radius: 14,
-                  child: Text('M'),
-                ),
+                const CircleAvatar(radius: 14, child: Text('M')),
               ],
             ),
           ),
-          Container(
-            height: 160,
-            color: Colors.grey.shade300,
-          ),
+          Container(height: 160, color: Colors.grey.shade300),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12).copyWith(bottom: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+            ).copyWith(bottom: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -320,7 +416,7 @@ class _PostCardState extends State<_PostCard> {
                       : Icons.thumb_up_alt_outlined,
                   count: _likes,
                   isActive: _isLiked,
-                  activeColor: const Color(0xFF00AEEF),
+                  activeColor: kPrimaryColor,
                   onTap: _toggleLike,
                 ),
                 _PostAction(
@@ -370,11 +466,7 @@ class _PostAction extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: isActive ? activeColor : Colors.black54,
-          ),
+          Icon(icon, size: 18, color: isActive ? activeColor : Colors.black54),
           const SizedBox(width: 4),
           Text(
             '$count',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/reset_password_page.dart';
@@ -114,8 +115,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ),
                         validator: (input) =>
                             !RegExp(r".+@.+\..+").hasMatch(input ?? '')
-                                ? 'بريد إلكتروني غير صالح'
-                                : null,
+                            ? 'بريد إلكتروني غير صالح'
+                            : null,
                       ),
                     ),
                     SizedBox(height: size.height * 0.04),
@@ -137,7 +138,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ? const Center(child: CircularProgressIndicator())
                           : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00AEEF),
+                                backgroundColor: kPrimaryColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),

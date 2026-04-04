@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mafqood/constants.dart';
 
 class ChatMessage {
   final String text;
@@ -25,10 +26,26 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   final List<ChatMessage> _messages = [
-    ChatMessage(text: 'السلام عليكم', isMe: false, timestamp: DateTime.now().subtract(const Duration(minutes: 30))),
-    ChatMessage(text: 'وعليكم السلام', isMe: true, timestamp: DateTime.now().subtract(const Duration(minutes: 28))),
-    ChatMessage(text: 'هل عندك أي معلومة؟', isMe: false, timestamp: DateTime.now().subtract(const Duration(minutes: 25))),
-    ChatMessage(text: 'نعم، سأرسل لك التفاصيل', isMe: true, timestamp: DateTime.now().subtract(const Duration(minutes: 20))),
+    ChatMessage(
+      text: 'السلام عليكم',
+      isMe: false,
+      timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
+    ),
+    ChatMessage(
+      text: 'وعليكم السلام',
+      isMe: true,
+      timestamp: DateTime.now().subtract(const Duration(minutes: 28)),
+    ),
+    ChatMessage(
+      text: 'هل عندك أي معلومة؟',
+      isMe: false,
+      timestamp: DateTime.now().subtract(const Duration(minutes: 25)),
+    ),
+    ChatMessage(
+      text: 'نعم، سأرسل لك التفاصيل',
+      isMe: true,
+      timestamp: DateTime.now().subtract(const Duration(minutes: 20)),
+    ),
   ];
 
   @override
@@ -43,11 +60,9 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
     if (text.isEmpty) return;
 
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isMe: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isMe: true, timestamp: DateTime.now()),
+      );
       _messageController.clear();
     });
 
@@ -74,7 +89,7 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00AEEF),
+        backgroundColor: kPrimaryColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -110,10 +125,7 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
                   ),
                   const Text(
                     'متصل الآن',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ],
               ),
@@ -141,18 +153,15 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
-                final showDate = index == 0 ||
+                final showDate =
+                    index == 0 ||
                     _messages[index].timestamp.day !=
                         _messages[index - 1].timestamp.day;
 
                 return Column(
                   children: [
-                    if (showDate)
-                      _DateChip(date: message.timestamp),
-                    _MessageBubble(
-                      message: message,
-                      formatTime: _formatTime,
-                    ),
+                    if (showDate) _DateChip(date: message.timestamp),
+                    _MessageBubble(message: message, formatTime: _formatTime),
                   ],
                 );
               },
@@ -181,8 +190,7 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
               children: [
                 // Attachment button
                 IconButton(
-                  icon: const Icon(Icons.attach_file,
-                      color: Color(0xFF00AEEF)),
+                  icon: const Icon(Icons.attach_file, color: kPrimaryColor),
                   onPressed: () {
                     // TODO: file attachment
                   },
@@ -199,11 +207,15 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
                       textDirection: TextDirection.rtl,
                       decoration: const InputDecoration(
                         hintText: 'اكتب رسالتك...',
-                        hintStyle:
-                            TextStyle(color: Colors.black38, fontSize: 14),
+                        hintStyle: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 14,
+                        ),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                     ),
@@ -217,11 +229,14 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
                     width: 42,
                     height: 42,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF00AEEF),
+                      color: kPrimaryColor,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.send,
-                        color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.send,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
@@ -261,10 +276,7 @@ class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final String Function(DateTime) formatTime;
 
-  const _MessageBubble({
-    required this.message,
-    required this.formatTime,
-  });
+  const _MessageBubble({required this.message, required this.formatTime});
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +291,7 @@ class _MessageBubble extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isMe ? const Color(0xFF00AEEF) : Colors.white,
+          color: isMe ? kPrimaryColor : Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -299,8 +311,9 @@ class _MessageBubble extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Text(
               message.text,

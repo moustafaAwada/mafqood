@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mafqood/constants.dart';
 
 /// Model for a comment (supports nested replies)
 class Comment {
@@ -199,16 +200,16 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
           if (_replyingTo != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              color: const Color(0xFF00AEEF).withOpacity(0.08),
+              color: kPrimaryColor.withOpacity(0.08),
               child: Row(
                 children: [
-                  const Icon(Icons.reply, size: 16, color: Color(0xFF00AEEF)),
+                  const Icon(Icons.reply, size: 16, color: kPrimaryColor),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       'الرد على ${_replyingTo!.userName}',
                       style: const TextStyle(
-                        color: Color(0xFF00AEEF),
+                        color: kPrimaryColor,
                         fontSize: 13,
                       ),
                     ),
@@ -216,7 +217,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                   GestureDetector(
                     onTap: _cancelReply,
                     child: const Icon(Icons.close,
-                        size: 16, color: Color(0xFF00AEEF)),
+                        size: 16, color: kPrimaryColor),
                   ),
                 ],
               ),
@@ -244,7 +245,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               children: [
                 const CircleAvatar(
                   radius: 16,
-                  backgroundColor: Color(0xFF00AEEF),
+                  backgroundColor: kPrimaryColor,
                   child:
                       Text('أ', style: TextStyle(color: Colors.white, fontSize: 14)),
                 ),
@@ -278,7 +279,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF00AEEF),
+                      color: kPrimaryColor,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.send,
@@ -329,11 +330,11 @@ class _CommentTileState extends State<_CommentTile> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: const Color(0xFF00AEEF).withOpacity(0.15),
+                backgroundColor: kPrimaryColor.withOpacity(0.15),
                 child: Text(
                   comment.userName.isNotEmpty ? comment.userName[0] : '?',
                   style: const TextStyle(
-                    color: Color(0xFF00AEEF),
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -377,7 +378,7 @@ class _CommentTileState extends State<_CommentTile> {
                       child: const Text(
                         'رد',
                         style: TextStyle(
-                          color: Color(0xFF00AEEF),
+                          color: kPrimaryColor,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -436,13 +437,13 @@ class _CommentTileState extends State<_CommentTile> {
                         CircleAvatar(
                           radius: 12,
                           backgroundColor:
-                              const Color(0xFF00AEEF).withOpacity(0.1),
+                              kPrimaryColor.withOpacity(0.1),
                           child: Text(
                             reply.userName.isNotEmpty
                                 ? reply.userName[0]
                                 : '?',
                             style: const TextStyle(
-                              color: Color(0xFF00AEEF),
+                              color: kPrimaryColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),

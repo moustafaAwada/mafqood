@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
@@ -164,12 +165,12 @@ class _LoginPageState extends State<LoginPage> {
                             child: authState.isLoading
                                 ? const Center(
                                     child: CircularProgressIndicator(
-                                      color: Color(0xFF00AEEF),
+                                      color: kPrimaryColor,
                                     ),
                                   )
                                 : ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF00AEEF),
+                                      backgroundColor: kPrimaryColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),

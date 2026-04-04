@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mafqood/constants.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -7,7 +8,7 @@ class NotificationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00AEEF),
+        backgroundColor: kPrimaryColor,
         elevation: 0,
         title: const Text('الإشعارات', style: TextStyle(color: Colors.white)),
       ),
@@ -42,7 +43,7 @@ class NotificationItem extends StatelessWidget {
       child: ListTile(
         leading: const Icon(
           Icons.notifications_active_outlined,
-          color: Color(0xFF00AEEF),
+          color: kPrimaryColor,
         ),
         title: Text(title),
         subtitle: Text(
