@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 class MemberEmergencyPage extends StatefulWidget {
   final String memberName;
@@ -21,25 +20,36 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF2B9FE6), // Blue from screenshot
+          backgroundColor: colorScheme.primary,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(
+              Icons.arrow_forward_ios,
+              color: theme.scaffoldBackgroundColor,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             'حالات الطوارئ',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: theme.scaffoldBackgroundColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           actions: [
             // A hidden debug button to toggle state
             IconButton(
-              icon: const Icon(Icons.swap_horiz, color: Colors.white54),
+              icon: Icon(
+                Icons.swap_horiz,
+                color: theme.scaffoldBackgroundColor,
+              ),
               onPressed: () {
                 setState(() {
                   _isEmergency = !_isEmergency;
@@ -64,10 +74,10 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
                 // ── Status Text ──
                 Text(
                   _isEmergency ? 'هناك شئ ما يحدث؟' : 'كل شئ علي ما يرام ....',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
 
@@ -76,7 +86,7 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
                 // ── Member Card ──
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _isEmergency ? Colors.red : Colors.green,
@@ -84,7 +94,7 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: colorScheme.onSurface.withOpacity(0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -102,11 +112,14 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
                         children: [
                           CircleAvatar(
                             radius: 26,
-                            backgroundColor: Colors.grey.shade300,
+                            backgroundColor: theme.dividerColor,
                             backgroundImage: AssetImage(widget.memberImage),
                             onBackgroundImageError: (_, __) {},
                             child: widget.memberImage.isEmpty
-                                ? const Icon(Icons.person, color: Colors.white)
+                                ? Icon(
+                                    Icons.person,
+                                    color: theme.scaffoldBackgroundColor,
+                                  )
                                 : null,
                           ),
                           Positioned(
@@ -119,7 +132,7 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
                                 color: Colors.green,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                   width: 2,
                                 ),
                               ),
@@ -140,12 +153,12 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
                                 fontSize: 16,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            const Text(
+                            SizedBox(height: 4),
+                            Text(
                               'mostafaalfy@gmail.com', // Static for prototype
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.black54,
+                                color: colorScheme.onSurface.withOpacity(0.6),
                               ),
                             ),
                           ],
@@ -165,20 +178,34 @@ class _MemberEmergencyPageState extends State<MemberEmergencyPage> {
   }
 
   Widget _buildSafeIcon() {
-    return Image.asset(
-      'assets/images/everything _is_good.gif', // Safe GIF
+    return Container(
       width: 200,
       height: 200,
-      fit: BoxFit.contain,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        image: DecorationImage(
+          image: AssetImage(
+            'assets/images/everything _is_good.gif', // Safe GIF
+          ),
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 
   Widget _buildEmergencyIcon() {
-    return Image.asset(
-      'assets/images/there\'s_something_goingon.gif', // Emergency GIF
+    return Container(
       width: 200,
       height: 200,
-      fit: BoxFit.contain,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        image: DecorationImage(
+          image: AssetImage(
+            'assets/images/there\'s_something_goingon.gif', // Emergency GIF
+          ),
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 }

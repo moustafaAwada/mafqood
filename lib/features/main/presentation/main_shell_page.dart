@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
-import 'package:mafqood/features/account/account_page.dart';
-import 'package:mafqood/features/chat/presentation/chat_page.dart';
-import 'package:mafqood/features/home/home_page.dart';
-import 'package:mafqood/features/notification/notifications_page.dart';
+import 'package:mafqood/features/account/presentation/pages/account_page.dart';
+import 'package:mafqood/features/chat/presentation/pages/chat_page.dart';
+import 'package:mafqood/features/home/presentation/pages/home_page.dart';
+import 'package:mafqood/features/notification/presentation/notifications_page.dart';
 
 class MainShellPage extends StatefulWidget {
   const MainShellPage({super.key});
@@ -35,13 +34,15 @@ class _MainShellPageState extends State<MainShellPage> {
   }
 
   Widget _buildBottomNav() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return BottomNavigationBar(
       currentIndex: _currentIndex,
       onTap: (i) => setState(() => _currentIndex = i),
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: kPrimaryColor,
-      unselectedItemColor: Colors.black54,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      selectedItemColor: colorScheme.primary,
+      unselectedItemColor: colorScheme.onSurface.withOpacity(0.6),
       showUnselectedLabels: true,
       items: const [
         BottomNavigationBarItem(

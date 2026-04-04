@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/account/presentation/pages/active_family_care_page.dart';
 
 class SubscriptionCheckoutPage extends StatefulWidget {
@@ -25,11 +24,11 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
   final _walletNumberController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  final _paymentMethods = const [
+  final _paymentMethods = [
     _PaymentMethod(icon: Icons.credit_card, label: 'بطاقة ائتمان'),
-    _PaymentMethod(icon: Icons.phone_android, label: 'فودافون كاش'),
-    _PaymentMethod(icon: Icons.language, label: 'فوري'),
-    _PaymentMethod(icon: Icons.account_balance, label: 'انستاباي'),
+    _PaymentMethod(icon: Icons.account_balance_wallet_outlined, label: 'محفظة إلكترونية'),
+    _PaymentMethod(icon: Icons.qr_code_scanner, label: 'فوري / أمان'),
+    _PaymentMethod(icon: Icons.account_balance_outlined, label: 'انستاباي'),
   ];
 
   @override
@@ -44,43 +43,46 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
 
   void _submit() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم إتمام الاشتراك بنجاح'),
-        backgroundColor: Color(0xFF4CAF50),
+      SnackBar(
+        content: const Text('تم إتمام الاشتراك بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+        backgroundColor: const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
     
-    // Pop the checkout, subscription info, and intro pages, 
-    // then push the active family dashboard.
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (_) => const ActiveFamilyCarePage(),
       ),
-      (route) => route.isFirst, // Keep the root (which includes AccountPage/HomePage)
+      (route) => route.isFirst,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
           centerTitle: true,
-          title: const Text(
-            'إتمام الاشتراك',
+          title: Text(
+            'الدفع والاشتراك',
             style: TextStyle(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -88,138 +90,156 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── Subscription amount ──
+                    // ── Summary Card ──
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        color: colorScheme.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: colorScheme.primary.withOpacity(0.1)),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
                         children: [
-                          const Text(
-                            'مبلغ الاشتراك',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'خطة الاشتراك:',
+                                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6), fontSize: 13),
+                              ),
+                              Text(
+                                '${widget.planName} - العناية بالعائلة',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontSize: 14),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '${widget.amount} ج.م',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
+                          const SizedBox(height: 12),
+                          const Divider(height: 1),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'إجمالي المبلغ:',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface, fontSize: 15),
+                              ),
+                              Text(
+                                '${widget.amount} ج.م',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 20,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
-                    // ── Payment method title ──
-                    const Text(
-                      'اختر طريقة الدفع',
+                    // ── Payment methods ──
+                    Text(
+                      'اختر وسيلة الدفع المناسبة',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 100,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _paymentMethods.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final method = _paymentMethods[index];
+                          final isSelected = _selectedPayment == index;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedPayment = index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 110,
+                              decoration: BoxDecoration(
+                                color: isSelected ? colorScheme.primary.withOpacity(0.05) : colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isSelected ? colorScheme.primary : theme.dividerColor.withOpacity(0.1),
+                                  width: isSelected ? 2 : 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    method.icon,
+                                    color: isSelected ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.4),
+                                    size: 28,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    method.label,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 32),
 
-                    // ── Payment options ──
-                    ...List.generate(_paymentMethods.length, (index) {
-                      final method = _paymentMethods[index];
-                      final isSelected = _selectedPayment == index;
-
-                      return GestureDetector(
-                        onTap: () =>
-                            setState(() => _selectedPayment = index),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? kPrimaryColor
-                                  : Colors.grey.shade200,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                method.icon,
-                                color: isSelected
-                                    ? kPrimaryColor
-                                    : Colors.black54,
-                                size: 22,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                method.label,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-
-                    const SizedBox(height: 20),
-
-                    // ── Dynamic form fields based on selection ──
-                    _buildFormForPayment(),
+                    // ── Payment Form ──
+                    _buildPaymentForm(colorScheme, theme),
                   ],
                 ),
               ),
             ),
 
-            // ── Submit button ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+            // ── Pay button ──
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
               child: SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimaryColor,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'إتمام الاشتراك',
+                    'تأكيد الدفع والاستمتاع بالخدمة',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -231,259 +251,122 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
     );
   }
 
-  /// Builds different form fields based on the selected payment method.
-  Widget _buildFormForPayment() {
-    switch (_selectedPayment) {
-      case 0: // بطاقة ائتمان
-        return _buildCardFields(title: 'بيانات البطاقه');
-
-      case 1: // فودافون كاش
-        return _buildWalletFields();
-
-      case 2: // فوري
-        return _buildCardFields(title: 'بيانات البطاقه');
-
-      case 3: // انستاباي
-        return _buildInstaPayFields();
-
-      default:
-        return const SizedBox.shrink();
+  Widget _buildPaymentForm(ColorScheme colorScheme, ThemeData theme) {
+    if (_selectedPayment == 0 || _selectedPayment == 2) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInputLabel(colorScheme, 'رقم البطاقة'),
+          _buildTextField(
+            controller: _cardNumberController,
+            hint: 'xxxx xxxx xxxx xxxx',
+            icon: Icons.credit_card,
+            colorScheme: colorScheme,
+            theme: theme,
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInputLabel(colorScheme, 'تاريخ الانتهاء'),
+                    _buildTextField(
+                      controller: _expiryController,
+                      hint: 'MM/YY',
+                      colorScheme: colorScheme,
+                      theme: theme,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInputLabel(colorScheme, 'CVV'),
+                    _buildTextField(
+                      controller: _cvvController,
+                      hint: '***',
+                      isObscure: true,
+                      colorScheme: colorScheme,
+                      theme: theme,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInputLabel(colorScheme, 'رقم الموبايل المسجل'),
+          _buildTextField(
+            controller: _phoneController,
+            hint: '01xxxxxxxxx',
+            icon: Icons.phone_android,
+            colorScheme: colorScheme,
+            theme: theme,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'سيتم إرسال رمز تأكيد لمرة واحدة على هذا الرقم لإتمام العملية.',
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.4)),
+          ),
+        ],
+      );
     }
   }
 
-  /// Card number + expiry + CVV
-  Widget _buildCardFields({required String title}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+  Widget _buildInputLabel(ColorScheme colorScheme, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4, bottom: 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: colorScheme.onSurface.withOpacity(0.7),
         ),
-        const SizedBox(height: 6),
-        const Text(
-          'رقم البطاقه',
-          style: TextStyle(color: Colors.black54, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
-        _inputField(
-          controller: _cardNumberController,
-          hint: '1254 2345 3551 7586',
-          keyboardType: TextInputType.number,
-          textDirection: TextDirection.ltr,
-          prefixIcon: Icons.credit_card,
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'تاريخ الانتهاء',
-                    style: TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  _inputField(
-                    controller: _expiryController,
-                    hint: 'MM/YY',
-                    keyboardType: TextInputType.datetime,
-                    textDirection: TextDirection.ltr,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'CVV',
-                    style: TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  _inputField(
-                    controller: _cvvController,
-                    hint: '123',
-                    keyboardType: TextInputType.number,
-                    textDirection: TextDirection.ltr,
-                    textAlign: TextAlign.center,
-                    obscure: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
-  /// Vodafone Cash — wallet number
-  Widget _buildWalletFields() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        const Text(
-          'بيانات المحفظه',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'رقم المحفظه',
-          style: TextStyle(color: Colors.black54, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
-        _inputField(
-          controller: _walletNumberController,
-          hint: '01095914790',
-          keyboardType: TextInputType.phone,
-          textDirection: TextDirection.ltr,
-          prefixIcon: Icons.phone_android,
-        ),
-      ],
-    );
-  }
-
-  /// InstaPay — card fields + OR + phone
-  Widget _buildInstaPayFields() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        const Text(
-          'بيانات الحساب',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'رقم البطاقه',
-          style: TextStyle(color: Colors.black54, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
-        _inputField(
-          controller: _cardNumberController,
-          hint: '1254 2345 3551 7586',
-          keyboardType: TextInputType.number,
-          textDirection: TextDirection.ltr,
-          prefixIcon: Icons.credit_card,
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'تاريخ الانتهاء',
-                    style: TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  _inputField(
-                    controller: _expiryController,
-                    hint: 'MM/YY',
-                    keyboardType: TextInputType.datetime,
-                    textDirection: TextDirection.ltr,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'CVV',
-                    style: TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  _inputField(
-                    controller: _cvvController,
-                    hint: '123',
-                    keyboardType: TextInputType.number,
-                    textDirection: TextDirection.ltr,
-                    textAlign: TextAlign.center,
-                    obscure: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        // OR separator
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Center(
-            child: Text(
-              'OR',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-            ),
-          ),
-        ),
-
-        const Text(
-          'رقم الهاتف الخاص بالحساب',
-          style: TextStyle(color: Colors.black54, fontSize: 13),
-        ),
-        const SizedBox(height: 8),
-        _inputField(
-          controller: _phoneController,
-          hint: '01095914790',
-          keyboardType: TextInputType.phone,
-          textDirection: TextDirection.ltr,
-          prefixIcon: Icons.phone_android,
-        ),
-      ],
-    );
-  }
-
-  /// Reusable input field
-  Widget _inputField({
+  Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
-    TextInputType keyboardType = TextInputType.text,
-    TextDirection textDirection = TextDirection.rtl,
-    TextAlign textAlign = TextAlign.start,
-    IconData? prefixIcon,
-    bool obscure = false,
+    required ColorScheme colorScheme,
+    required ThemeData theme,
+    IconData? icon,
+    bool isObscure = false,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
       ),
       child: TextField(
         controller: controller,
-        keyboardType: keyboardType,
-        textDirection: textDirection,
-        textAlign: textAlign,
-        obscureText: obscure,
+        obscureText: isObscure,
+        textDirection: TextDirection.ltr,
+        textAlign: icon != null ? TextAlign.right : TextAlign.center,
+        style: TextStyle(color: colorScheme.onSurface, fontSize: 15, letterSpacing: 1.5),
         decoration: InputDecoration(
+          prefixIcon: icon != null ? Icon(icon, color: colorScheme.primary, size: 20) : null,
           hintText: hint,
-          hintStyle: const TextStyle(
-            color: Colors.black38,
+          hintStyle: TextStyle(
+            color: colorScheme.onSurface.withOpacity(0.2),
             fontSize: 14,
-            letterSpacing: 1.2,
+            letterSpacing: 1.5,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: Colors.black38)
-              : null,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -493,6 +376,5 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
 class _PaymentMethod {
   final IconData icon;
   final String label;
-
-  const _PaymentMethod({required this.icon, required this.label});
+  _PaymentMethod({required this.icon, required this.label});
 }

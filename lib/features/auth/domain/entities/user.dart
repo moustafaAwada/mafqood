@@ -11,12 +11,7 @@ class User {
     required this.phoneNumber,
   });
 
-  static const empty = User(
-    id: '',
-    email: '',
-    name: '',
-    phoneNumber: '',
-  );
+  static const empty = User(id: '', email: '', name: '', phoneNumber: '');
 
   bool get isEmpty => id.isEmpty;
   bool get isNotEmpty => id.isNotEmpty;
@@ -31,11 +26,11 @@ class User {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'email': email,
-        'name': name,
-        'phoneNumber': phoneNumber,
-      };
+    'id': id,
+    'email': email,
+    'name': name,
+    'phoneNumber': phoneNumber,
+  };
 
   User copyWith({
     String? id,

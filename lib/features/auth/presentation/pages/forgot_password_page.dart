@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/reset_password_page.dart';
@@ -17,34 +16,42 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
 
-  InputDecoration getInputDecoration(String hint, IconData iconData) {
+  InputDecoration getInputDecoration(
+    String hint,
+    IconData iconData,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return InputDecoration(
       filled: true,
       // fillColor: kBackgroundColor,
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+      hintStyle: TextStyle(
+        color: colorScheme.onSurface.withOpacity(0.6),
+        fontSize: 14,
+      ),
       prefixIcon: Icon(
         iconData,
         // color: kTextLowBlackColor
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
-      border: const OutlineInputBorder(
+      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.white, width: 2),
+        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
       ),
-      enabledBorder: const OutlineInputBorder(
+      enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.white, width: 2),
+        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.white, width: 2),
+        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
       ),
-      errorBorder: const OutlineInputBorder(
+      errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Color(0xFFF65054), width: 2),
       ),
-      focusedErrorBorder: const OutlineInputBorder(
+      focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Color(0xFFF65054), width: 2),
       ),
@@ -69,6 +76,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final size = MediaQuery.of(context).size;
 
     return Directionality(
@@ -78,12 +87,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             prev.isLoading != curr.isLoading || prev.error != curr.error,
         builder: (context, authState) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: theme.scaffoldBackgroundColor,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              foregroundColor: Colors.black,
-              title: const Text('نسيت كلمة المرور'),
+              foregroundColor: colorScheme.onSurface,
+              title: Text('نسيت كلمة المرور'),
               centerTitle: true,
             ),
             body: SingleChildScrollView(
@@ -99,7 +108,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       fit: BoxFit.contain,
                     ),
                     SizedBox(height: size.height * 0.05),
-                    const Text(
+                    Text(
                       'ادخل البريد الإلكتروني المسجل ليتم إرسال رمز إعادة تعيين كلمة المرور.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16),
@@ -112,6 +121,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         decoration: getInputDecoration(
                           'البريد الإلكتروني',
                           Icons.email_outlined,
+                          theme,
+                          colorScheme,
                         ),
                         validator: (input) =>
                             !RegExp(r".+@.+\..+").hasMatch(input ?? '')
@@ -122,7 +133,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     SizedBox(height: size.height * 0.04),
                     if (authState.error != null)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.only(bottom: 12),
                         child: Text(
                           authState.error!,
                           style: TextStyle(
@@ -135,20 +146,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       width: double.infinity,
                       height: size.height * 0.065,
                       child: authState.isLoading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? Center(child: CircularProgressIndicator())
                           : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: kPrimaryColor,
+                                backgroundColor: colorScheme.primary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               onPressed: _submit,
-                              child: const Text(
+                              child: Text(
                                 'إرسال الرمز',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                 ),
                               ),
                             ),

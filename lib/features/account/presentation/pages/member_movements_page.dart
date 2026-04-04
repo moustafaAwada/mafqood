@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 class MemberMovementsPage extends StatelessWidget {
   final String memberName;
@@ -10,75 +9,171 @@ class MemberMovementsPage extends StatelessWidget {
   });
 
   final List<Map<String, String>> _movements = const [
-    {'loc': 'قنا-قفط -البراهمه', 'time': 'منذ 1 دقيقه'},
-    {'loc': 'قنا -بندر قنا -المحطه', 'time': 'منذ 1 ساعه'},
-    {'loc': 'قنا-بندر قنا -حوض عشره', 'time': 'منذ 2 ساعه'},
-    {'loc': 'قنا-بندر قنا -الشؤؤن', 'time': 'منذ 3 ساعه'},
-    {'loc': 'قنا-بندر قنا -عمر افندي', 'time': 'منذ 4 ساعه'},
-    {'loc': 'قنا-بندر قنا -التجنيد', 'time': 'منذ 5 ساعه'},
-    {'loc': 'قنا-بندر قنا -المعبر', 'time': 'منذ 6 ساعه'},
-    {'loc': 'قنا-قفط -البراهمه', 'time': 'منذ 7 ساعه'},
+    {'loc': 'قنا - قفط - البراهمة', 'time': '12:45 م', 'date': 'اليوم'},
+    {'loc': 'قنا - بندر قنا - المحطة', 'time': '11:20 ص', 'date': 'اليوم'},
+    {'loc': 'قنا - بندر قنا - حوض عشرة', 'time': '09:15 ص', 'date': 'اليوم'},
+    {'loc': 'قنا - بندر قنا - الشؤون', 'time': '08:00 ص', 'date': 'اليوم'},
+    {'loc': 'قنا - بندر قنا - عمر أفندي', 'time': '11:30 م', 'date': 'أمس'},
+    {'loc': 'قنا - بندر قنا - التجنيد', 'time': '10:00 م', 'date': 'أمس'},
+    {'loc': 'قنا - بندر قنا - المعبر', 'time': '08:45 م', 'date': 'أمس'},
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
+          centerTitle: true,
+          title: Text(
+            'سجل التحركات',
+            style: TextStyle(
+              color: colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            'اخر التحركات',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
         ),
-        body: ListView.separated(
-          padding: const EdgeInsets.all(16),
+        body: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           itemCount: _movements.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final mov = _movements[index];
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.blue.withOpacity(0.2)),
-              ),
+            final isFirst = index == 0;
+            final isLast = index == _movements.length - 1;
+            
+            return IntrinsicHeight(
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F1FC),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.location_on_outlined,
-                      color: Colors.black87,
+                  // ── Timeline indicator ──
+                  SizedBox(
+                    width: 40,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 2,
+                          height: 12,
+                          color: isFirst ? Colors.transparent : colorScheme.primary.withOpacity(0.2),
+                        ),
+                        Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: isFirst ? colorScheme.primary : colorScheme.surface,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isFirst ? colorScheme.primary : colorScheme.primary.withOpacity(0.5),
+                              width: 3,
+                            ),
+                            boxShadow: isFirst ? [
+                              BoxShadow(
+                                color: colorScheme.primary.withOpacity(0.3),
+                                blurRadius: 6,
+                                spreadRadius: 2,
+                              ),
+                            ] : null,
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            width: 2,
+                            color: isLast ? Colors.transparent : colorScheme.primary.withOpacity(0.2),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+
                   const SizedBox(width: 16),
+
+                  // ── Content card ──
                   Expanded(
-                    child: Text(
-                      mov['loc']!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isFirst 
+                              ? colorScheme.primary.withOpacity(0.1) 
+                              : theme.dividerColor.withOpacity(0.05),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.01),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  mov['date']!,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary.withOpacity(0.7),
+                                  ),
+                                ),
+                                Text(
+                                  mov['time']!,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: colorScheme.onSurface.withOpacity(0.4),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              mov['loc']!,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            if (isFirst) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.check_circle, size: 12, color: Colors.green),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'الموقع الحالي المستقر',
+                                      style: TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                  Text(
-                    mov['time']!,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 13,
                     ),
                   ),
                 ],

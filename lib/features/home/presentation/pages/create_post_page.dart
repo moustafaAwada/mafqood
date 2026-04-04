@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 enum PostType { mafqood, mawjood }
 
@@ -12,9 +11,22 @@ class CreatePostPage extends StatefulWidget {
   State<CreatePostPage> createState() => _CreatePostPageState();
 }
 
+class _ChatUser {
+  final String name;
+  final String email;
+  final String avatar;
+
+  _ChatUser({required this.name, required this.email, required this.avatar});
+}
+
 class _CreatePostPageState extends State<CreatePostPage> {
   final _textController = TextEditingController();
   bool _autoDetectLocation = false;
+  final _ChatUser _currentUser = _ChatUser(
+    name: 'Mustafa Alfy',
+    email: 'mustafaalfy@gmail.com',
+    avatar: 'MA',
+  );
 
   bool get _isMafqood => widget.postType == PostType.mafqood;
 
@@ -35,9 +47,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
   void _submit() {
     // TODO: Submit post logic
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم إنشاء المنشور بنجاح'),
-        backgroundColor: Color(0xFF4CAF50),
+      SnackBar(
+        content: const Text('تم إنشاء المنشور بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+        backgroundColor: const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
     Navigator.pop(context);
@@ -45,24 +59,27 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
           centerTitle: true,
           title: Text(
             _appBarTitle,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -70,45 +87,38 @@ class _CreatePostPageState extends State<CreatePostPage> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // ── User profile card ──
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.grey.shade200),
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Row(
                         children: [
-                          // Avatar with online indicator
                           Stack(
                             children: [
-                              const CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Color(0xFFE0F7FA),
+                              CircleAvatar(
+                                radius: 26,
+                                backgroundColor: colorScheme.primaryContainer,
                                 child: Text(
-                                  'M',
+                                  _currentUser.avatar,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: kPrimaryColor,
+                                    color: colorScheme.onPrimaryContainer,
                                   ),
                                 ),
                               ),
@@ -116,37 +126,38 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 bottom: 0,
                                 right: 0,
                                 child: Container(
-                                  width: 12,
-                                  height: 12,
+                                  width: 14,
+                                  height: 14,
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF4CAF50),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white,
-                                      width: 2,
+                                      color: colorScheme.surface,
+                                      width: 2.5,
                                     ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(width: 12),
-                          const Expanded(
+                          const SizedBox(width: 14),
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Mostafa Alfy',
+                                  _currentUser.name,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
-                                SizedBox(height: 2),
+                                const SizedBox(height: 2),
                                 Text(
-                                  'mostafaalfy@gmail.com',
+                                  _currentUser.email,
                                   style: TextStyle(
-                                    color: Colors.black54,
+                                    color: colorScheme.onSurface.withOpacity(0.5),
                                     fontSize: 13,
                                   ),
                                 ),
@@ -157,145 +168,180 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
                     // ── Status badge + Text input ──
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Status badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: _statusColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: _statusColor.withOpacity(0.2)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: _statusColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _statusLabel,
+                                      style: TextStyle(
+                                        color: _statusColor,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(Icons.format_quote_outlined, color: _statusColor.withOpacity(0.3)),
+                            ],
                           ),
-                          decoration: BoxDecoration(
-                            color: _statusColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _statusLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Text input
-                        Expanded(
-                          child: TextField(
+                          const SizedBox(height: 16),
+                          TextField(
                             controller: _textController,
-                            maxLines: 2,
-                            minLines: 1,
+                            maxLines: 5,
+                            minLines: 2,
                             textDirection: TextDirection.rtl,
-                            decoration: const InputDecoration(
-                              hintText: 'اضافه نص للمنشور...؟',
+                            style: TextStyle(color: colorScheme.onSurface, fontSize: 15),
+                            decoration: InputDecoration(
+                              hintText: 'اكتب تفاصيل المنشور هنا، ساعدنا في العثور على المفقود...',
                               hintStyle: TextStyle(
-                                color: Colors.black38,
+                                color: colorScheme.onSurface.withOpacity(0.3),
                                 fontSize: 14,
+                                height: 1.5,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // ── Location section ──
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'الموقع الحالي',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'قنا -قنا-قنا',
-                          style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Auto-detect location toggle
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'تحديد الموقع تلقائيا',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                        Transform.scale(
-                          scale: 0.8,
-                          child: Switch(
-                            value: _autoDetectLocation,
-                            onChanged: (val) {
-                              setState(() => _autoDetectLocation = val);
-                            },
-                            activeColor: kPrimaryColor,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 20),
 
-                    // ── Image / Video picker area ──
+                    // ── Location section ──
+                    _SectionTitle(title: 'الموقع'),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+                      ),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+                            title: Text(
+                              'تحديد الموقع تلقائيا',
+                              style: TextStyle(fontSize: 14, color: colorScheme.onSurface, fontWeight: FontWeight.w500),
+                            ),
+                            trailing: Switch.adaptive(
+                              value: _autoDetectLocation,
+                              activeColor: colorScheme.primary,
+                              onChanged: (val) {
+                                setState(() => _autoDetectLocation = val);
+                              },
+                            ),
+                          ),
+                          if (!_autoDetectLocation)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: TextField(
+                                textDirection: TextDirection.rtl,
+                                decoration: InputDecoration(
+                                  hintText: 'ادخل اسم المدينة او المنطقة...',
+                                  hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.3), fontSize: 13),
+                                  filled: true,
+                                  fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── Media area ──
+                    _SectionTitle(title: 'الصور / الفيديو'),
+                    const SizedBox(height: 12),
                     GestureDetector(
-                      onTap: () {
-                        // TODO: Implement image/video picking
-                      },
+                      onTap: () {},
                       child: Container(
-                        height: 180,
+                        height: 160,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF0F8FF),
-                          borderRadius: BorderRadius.circular(14),
+                          color: colorScheme.primary.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: kPrimaryColor.withOpacity(0.3),
+                            color: colorScheme.primary.withOpacity(0.15),
                             width: 1.5,
+                            style: BorderStyle.solid,
                           ),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              _isMafqood
-                                  ? Icons.add_photo_alternate_outlined
-                                  : Icons.camera_alt_outlined,
-                              size: 56,
-                              color: Colors.black54,
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isMafqood
+                                    ? Icons.add_photo_alternate_outlined
+                                    : Icons.camera_alt_outlined,
+                                size: 32,
+                                color: colorScheme.primary,
+                              ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
                             Text(
                               _isMafqood
-                                  ? 'اضافه صوره / فيديو'
-                                  : 'التقاط صوره / فديو',
-                              style: const TextStyle(
-                                color: Colors.black54,
+                                  ? 'اضافه صوره / فيديو للمفقود'
+                                  : 'التقاط صوره / فديو للحالة',
+                              style: TextStyle(
+                                color: colorScheme.onSurface.withOpacity(0.6),
                                 fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'أقصى حجم 10 ميجابايت',
+                              style: TextStyle(
+                                color: colorScheme.onSurface.withOpacity(0.3),
+                                fontSize: 11,
                               ),
                             ),
                           ],
@@ -307,27 +353,38 @@ class _CreatePostPageState extends State<CreatePostPage> {
               ),
             ),
 
-            // ── Publish button (pinned at bottom) ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            // ── Publish button ──
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
               child: SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 54,
                 child: ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimaryColor,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'نشر',
+                    'نشر المنشور الآن',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -335,6 +392,23 @@ class _CreatePostPageState extends State<CreatePostPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }

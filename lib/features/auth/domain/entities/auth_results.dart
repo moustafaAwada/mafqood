@@ -1,7 +1,7 @@
 class RegisterResult {
   final String userId;
 
-  const RegisterResult({required this.userId});
+  RegisterResult({required this.userId});
 }
 
 class AuthUserResult {
@@ -10,7 +10,7 @@ class AuthUserResult {
   final String name;
   final String phoneNumber;
 
-  const AuthUserResult({
+  AuthUserResult({
     required this.id,
     required this.email,
     required this.name,
@@ -21,5 +21,5 @@ class AuthUserResult {
 class ForgetPasswordResult {
   final String email;
 
-  const ForgetPasswordResult({required this.email});
+  ForgetPasswordResult({required this.email});
 }

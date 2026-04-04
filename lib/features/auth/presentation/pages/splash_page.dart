@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
-import 'package:mafqood/features/main/main_shell_page.dart';
+import 'package:mafqood/features/main/presentation/main_shell_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -24,7 +24,7 @@ class _SplashPageState extends State<SplashPage>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: Duration(milliseconds: 700),
     );
     _scale = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _controller.forward();
@@ -37,21 +37,21 @@ class _SplashPageState extends State<SplashPage>
       await context.read<AuthCubit>().initialize();
     } catch (_) {}
 
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(Duration(seconds: 1));
 
     if (!mounted) return;
 
     final isLoggedIn =
         context.read<AuthCubit>().state.status == AuthStatus.authenticated;
     if (isLoggedIn) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShellPage()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => MainShellPage()));
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShellPage()),
-      );
-      // ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginPage()));
+      Navigator.of(
+        context,
+        // ).pushReplacement(MaterialPageRoute(builder: (_) => MainShellPage()));
+      ).pushReplacement(MaterialPageRoute(builder: (_) => LoginPage()));
     }
   }
 
@@ -63,8 +63,9 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: ScaleTransition(
           scale: _scale,
@@ -77,19 +78,16 @@ class _SplashPageState extends State<SplashPage>
                 height: 300,
                 fit: BoxFit.contain,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 'Mafqood',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               // if (loc?.appSubtitle != null) ...[
-              //   const SizedBox(height: 6),
+              //   SizedBox(height: 6),
               //   Text(
               //     loc!.appSubtitle,
-              //     style: const TextStyle(fontSize: 12, color: Colors.black54),
+              //     style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.6)),
               //   ),
               // ],
             ],

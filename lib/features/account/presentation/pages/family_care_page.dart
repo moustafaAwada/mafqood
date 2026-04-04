@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/account/presentation/pages/family_care_subscription_page.dart';
 
 class FamilyCarePage extends StatelessWidget {
@@ -7,84 +6,101 @@ class FamilyCarePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
           centerTitle: true,
-          title: const Text(
+          title: Text(
             'العناية بالعائلة',
             style: TextStyle(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Column(
-          children: [
-            const Spacer(flex: 2),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const Spacer(flex: 2),
 
-            // ── Crown icon ──
-            Center(
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFF3E0),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.workspace_premium,
-                  size: 70,
-                  color: Color(0xFFFFA000),
+              // ── Premium Illustration / Icon ──
+              Center(
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.05),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.family_restroom_rounded,
+                        size: 60,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 32),
+              const SizedBox(height: 48),
 
-            // ── Title ──
-            const Text(
-              'العناية بالعائلة',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+              // ── Title ──
+              Text(
+                'حماية عائلتك تبدأ هنا',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // ── Description ──
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                'خاصيه مميزه للمشتركين فقط\nتابع موقع افراد العائله وتاكد من سلامتهم',
+              // ── Description ──
+              Text(
+                'خاصية متميزة تتيح لك تتبع مواقع أفراد عائلتك في الوقت الفعلي وتلقي تنبيهات في حالات الطوارئ لضمان سلامتهم دائماً.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.black54,
+                  color: colorScheme.onSurface.withOpacity(0.6),
                   height: 1.6,
                 ),
               ),
-            ),
 
-            const Spacer(flex: 3),
+              const Spacer(flex: 3),
 
-            // ── Upgrade button ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-              child: SizedBox(
+              // ── Feature points ──
+              _buildFeatureRow(context, Icons.location_on_outlined, 'تتبع المواقع المباشر'),
+              const SizedBox(height: 12),
+              _buildFeatureRow(context, Icons.notifications_active_outlined, 'تنبيهات الطوارئ الفورية'),
+              
+              const Spacer(flex: 1),
+
+              // ── Upgrade button ──
+              SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -95,26 +111,46 @@ class FamilyCarePage extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimaryColor,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'الترقيه للنسخه المميزه',
+                    'اشترك الآن في النسخة المميزة',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFeatureRow(BuildContext context, IconData icon, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 18, color: colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface.withOpacity(0.8),
+          ),
+        ),
+      ],
     );
   }
 }

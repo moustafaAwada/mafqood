@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -25,32 +24,34 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     // final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9C000),
+        backgroundColor: Color(0xFFF9C000),
         elevation: 0,
         centerTitle: true,
         title: Text(
           // l10n.changePassword,
           'تغير كلمة المرور',
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             _buildPasswordInput(
               label: 'oldPassword',
@@ -62,9 +63,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   () => _isOldPasswordObscured = !_isOldPasswordObscured,
                 );
               },
+              theme: theme,
+              colorScheme: colorScheme,
             ),
 
-            const SizedBox(height: 25),
+            SizedBox(height: 25),
 
             _buildPasswordInput(
               label: 'newPassword',
@@ -76,21 +79,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   () => _isNewPasswordObscured = !_isNewPasswordObscured,
                 );
               },
+              theme: theme,
+              colorScheme: colorScheme,
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
 
             SizedBox(
               width: double.infinity,
               height: 55,
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: () {
                         // _handlePasswordChange();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE67E22),
+                        backgroundColor: Color(0xFFE67E22),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -98,10 +103,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       ),
                       child: Text(
                         'saveChanges',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: theme.scaffoldBackgroundColor,
                         ),
                       ),
                     ),
@@ -118,28 +123,30 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     required TextEditingController controller,
     required bool isObscured,
     required VoidCallback onToggle,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.scaffoldBackgroundColor,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: colorScheme.onSurface.withOpacity(0.05),
                 blurRadius: 10,
-                offset: const Offset(0, 4),
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -148,13 +155,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             obscureText: isObscured,
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              hintStyle: TextStyle(color: theme.dividerColor, fontSize: 14),
               prefixIcon: IconButton(
                 icon: Icon(
                   isObscured
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
-                  color: Colors.grey,
+                  color: theme.dividerColor,
                   size: 20,
                 ),
                 onPressed: onToggle,
@@ -163,7 +170,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(
+              contentPadding: EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 16,
               ),

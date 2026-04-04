@@ -8,7 +8,7 @@ class RegisterRequest {
   final String password;
   final String deviceId;
 
-  const RegisterRequest({
+  RegisterRequest({
     required this.name,
     required this.email,
     required this.phoneNumber,
@@ -30,7 +30,7 @@ class LoginRequest {
   final String password;
   final String deviceId;
 
-  const LoginRequest({
+  LoginRequest({
     required this.email,
     required this.password,
     required this.deviceId,
@@ -47,7 +47,7 @@ class ConfirmEmailRequest {
   final String userId;
   final String code;
 
-  const ConfirmEmailRequest({
+  ConfirmEmailRequest({
     required this.userId,
     required this.code,
   });
@@ -61,7 +61,7 @@ class ConfirmEmailRequest {
 class ForgetPasswordRequest {
   final String email;
 
-  const ForgetPasswordRequest({required this.email});
+  ForgetPasswordRequest({required this.email});
 
   Map<String, dynamic> toJson() => {'email': email};
 }
@@ -71,7 +71,7 @@ class ResetPasswordRequest {
   final String code;
   final String newPassword;
 
-  const ResetPasswordRequest({
+  ResetPasswordRequest({
     required this.email,
     required this.code,
     required this.newPassword,
@@ -88,7 +88,7 @@ class RefreshTokenRequest {
   final String token;
   final String refreshToken;
 
-  const RefreshTokenRequest({
+  RefreshTokenRequest({
     required this.token,
     required this.refreshToken,
   });
@@ -103,7 +103,7 @@ class RevokeTokenRequest {
   final String token;
   final String refreshToken;
 
-  const RevokeTokenRequest({
+  RevokeTokenRequest({
     required this.token,
     required this.refreshToken,
   });
@@ -119,7 +119,7 @@ class RevokeTokenRequest {
 class RegisterResponse {
   final String userId;
 
-  const RegisterResponse({required this.userId});
+  RegisterResponse({required this.userId});
 
   factory RegisterResponse.fromJson(Map<String, dynamic> json) {
     return RegisterResponse(
@@ -138,7 +138,7 @@ class AuthResponse {
   final String refreshToken;
   final DateTime refreshTokenExpiration;
 
-  const AuthResponse({
+  AuthResponse({
     required this.id,
     required this.email,
     required this.name,
@@ -160,7 +160,7 @@ class AuthResponse {
       refreshToken: json['refreshToken'] as String? ?? '',
       refreshTokenExpiration: json['refreshTokenExpiration'] != null
           ? DateTime.parse(json['refreshTokenExpiration'] as String)
-          : DateTime.now().add(const Duration(days: 7)),
+          : DateTime.now().add(Duration(days: 7)),
     );
   }
 
@@ -179,7 +179,7 @@ class AuthResponse {
 class ForgetPasswordResponse {
   final String email;
 
-  const ForgetPasswordResponse({required this.email});
+  ForgetPasswordResponse({required this.email});
 
   factory ForgetPasswordResponse.fromJson(Map<String, dynamic> json) {
     return ForgetPasswordResponse(

@@ -1,99 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 class SettingsChangePasswordPage extends StatelessWidget {
   const SettingsChangePasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+          centerTitle: true,
+          title: Text(
+            'تغيير كلمة المرور',
+            style: TextStyle(
+              color: colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
-          title: const Text(
-            'تغير كلمه المرور',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              // Header Illustration/Icon
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.05),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.lock_reset_rounded,
+                    size: 64,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 48),
 
               // Old password
-              const Text(
-                'ادخل كلمه المرور القديمه',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 12),
-              _buildTextField('كلمه المرور القديمه'),
+              _buildInputLabel(colorScheme, 'كلمة المرور القديمة'),
+              _buildPasswordField(colorScheme, theme, 'أدخل كلمة المرور الحالية'),
 
               const SizedBox(height: 24),
 
               // New password
-              const Text(
-                'ادخل كلمه المرور الجديده',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 12),
-              _buildTextField('كلمه المرور الجديده'),
+              _buildInputLabel(colorScheme, 'كلمة المرور الجديدة'),
+              _buildPasswordField(colorScheme, theme, 'أدخل كلمة المرور الجديدة'),
 
               const SizedBox(height: 16),
 
               // Confirm password
-              _buildTextField('تاكيد كلمه المرور'),
+              _buildPasswordField(colorScheme, theme, 'تأكيد كلمة المرور الجديدة'),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Forgot password?
-              const Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'نسيت كلمه المرور؟',
-                  style: TextStyle(
-                    color: Color(0xFFFFA000), // Orange
-                    fontSize: 14,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'نسيت كلمة المرور؟',
+                    style: TextStyle(
+                      color: colorScheme.secondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
-              // Login / Submit Button (labeled 'تسجيل الدخول' in screenshot)
+              // Submit Button
               SizedBox(
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تم تغيير كلمة المرور بنجاح'),
-                        backgroundColor: Color(0xFF4CAF50),
+                      SnackBar(
+                        content: const Text('تم تغيير كلمة المرور بنجاح'),
+                        backgroundColor: Colors.green.shade600,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     );
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B9FE6),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'تسجيل الدخول', // From screenshot
+                    'تحديث كلمة المرور',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -105,23 +125,43 @@ class SettingsChangePasswordPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String hint) {
+  Widget _buildInputLabel(ColorScheme colorScheme, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4, bottom: 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(ColorScheme colorScheme, ThemeData theme, String hint) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black87),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
       ),
       child: TextField(
         obscureText: true,
+        style: TextStyle(color: colorScheme.onSurface),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.black54),
+          hintStyle: TextStyle(
+            color: colorScheme.onSurface.withOpacity(0.3),
+            fontSize: 14,
+          ),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          suffixIcon: const Icon(Icons.remove_red_eye_outlined,
-              color: Color(0xFF2B9FE6)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          suffixIcon: Icon(
+            Icons.visibility_off_outlined,
+            color: colorScheme.onSurface.withOpacity(0.3),
+            size: 20,
+          ),
         ),
       ),
     );

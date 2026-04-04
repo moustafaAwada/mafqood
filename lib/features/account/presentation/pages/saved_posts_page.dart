@@ -1,59 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 class SavedPostsPage extends StatelessWidget {
   const SavedPostsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     // Sample saved posts data
     final savedPosts = [
-      const _SavedPostData(
-        userName: 'Mostafa Alfy',
+      _SavedPostData(
+        userName: 'مصطفى الألفي',
         status: 'مفقود',
-        statusColor: Color(0xFFFF5252),
+        isMissing: true,
         name: 'علي عمر صالح',
-        address: 'قنا -الشق..',
+        address: 'قنا - الشؤون',
       ),
-      const _SavedPostData(
-        userName: 'Mostafa Alfy',
+      _SavedPostData(
+        userName: 'أحمد ناصر',
         status: 'موجود',
-        statusColor: Color(0xFF4CAF50),
-        name: 'علي عمر صالح',
-        address: 'قنا -الشق..',
-      ),
-      const _SavedPostData(
-        userName: 'Mostafa Alfy',
-        status: 'مفقود',
-        statusColor: Color(0xFFFF5252),
-        name: 'علي عمر صالح',
-        address: 'قنا -الشق..',
+        isMissing: false,
+        name: 'ياسين محمد',
+        address: 'القاهرة - المعادي',
       ),
     ];
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
           centerTitle: true,
-          title: const Text(
-            'المنشورات المحفوظه',
+          title: Text(
+            'المنشورات المحفوظة',
             style: TextStyle(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
         ),
         body: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           itemCount: savedPosts.length,
           itemBuilder: (context, index) {
             return _SavedPostCard(data: savedPosts[index]);
@@ -67,14 +62,14 @@ class SavedPostsPage extends StatelessWidget {
 class _SavedPostData {
   final String userName;
   final String status;
-  final Color statusColor;
+  final bool isMissing;
   final String name;
   final String address;
 
   const _SavedPostData({
     required this.userName,
     required this.status,
-    required this.statusColor,
+    required this.isMissing,
     required this.name,
     required this.address,
   });
@@ -87,17 +82,22 @@ class _SavedPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final statusColor = data.isMissing ? colorScheme.error : const Color(0xFF4CAF50);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -105,85 +105,79 @@ class _SavedPostCard extends StatelessWidget {
         children: [
           // Post thumbnail image placeholder
           Container(
-            width: 64,
-            height: 64,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
+              color: colorScheme.primary.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.image_outlined,
-              color: Colors.grey.shade400,
-              size: 28,
+              color: colorScheme.primary.withOpacity(0.2),
+              size: 32,
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
 
           // Post info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User name + status badge
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Status badge
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 3,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: data.statusColor,
+                        color: statusColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         data.status,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      data.userName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    Icon(
+                      Icons.bookmark_rounded,
+                      color: colorScheme.primary,
+                      size: 18,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  data.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 12, color: colorScheme.onSurface.withOpacity(0.4)),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        data.address,
+                        style: TextStyle(
+                          color: colorScheme.onSurface.withOpacity(0.4),
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                // Name & address
-                Text(
-                  'الاسم: ${data.name} , العنوان: ${data.address}',
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // User avatar
-          const CircleAvatar(
-            radius: 20,
-            backgroundColor: Color(0xFFE0F7FA),
-            child: Text(
-              'M',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: kPrimaryColor,
-              ),
             ),
           ),
         ],

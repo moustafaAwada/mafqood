@@ -16,7 +16,6 @@ class ConfirmationEmailPage extends StatefulWidget {
 }
 
 class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
-  final _formKey = GlobalKey<FormState>();
   late final TextEditingController _codeController;
   late final TextEditingController _emailController;
   bool _isLoading = false;
@@ -102,6 +101,8 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return BlocBuilder<AuthCubit, AuthState>(
       buildWhen: (prev, curr) =>
           prev.isLoading != curr.isLoading || prev.error != curr.error,
@@ -112,7 +113,7 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back,
                 // color: AppColors.textPrimary
               ),
@@ -121,11 +122,11 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
           ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   Container(
                     width: 100,
                     height: 100,
@@ -133,40 +134,40 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
                       // color: AppColors.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.email_outlined,
                       size: 50,
                       // color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30),
                   Text(
                     'verifyEmailTitle',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       // color: AppColors.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30),
 
                   // Step 1: Email Input
                   AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
+                    duration: Duration(milliseconds: 300),
                     opacity: _codeSent ? 0.6 : 1.0,
                     child: TextFormField(
                       controller: _emailController,
                       enabled: !_codeSent, // Disable if code already sent
                       decoration: InputDecoration(
                         labelText: 'email',
-                        prefixIcon: const Icon(Icons.email),
+                        prefixIcon: Icon(Icons.email),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         suffixIcon: _codeSent
                             ? IconButton(
-                                icon: const Icon(Icons.edit),
+                                icon: Icon(Icons.edit),
                                 onPressed: () =>
                                     setState(() => _codeSent = false),
                               )
@@ -176,7 +177,7 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // Button to trigger Step 1 (only if code not sent)
                   if (!_codeSent)
@@ -185,95 +186,95 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _sendCode,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: colorScheme.onSurface,
+                          padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                 ),
                               )
                             : Text(
                                 "إرسال رمز التحقق",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                 ),
                               ),
                       ),
                     ),
 
                   if (_codeSent) ...[
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     Text(
                       'أدخل رمز التحقق المرسل إلى بريدك الإلكتروني',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         // color: AppColors.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     TextFormField(
                       controller: _codeController,
                       decoration: InputDecoration(
                         labelText: 'رمز التحقق',
                         hintText: "أدخل رمز التحقق المكون من 6 أرقام هنا",
-                        prefixIcon: const Icon(Icons.pin),
+                        prefixIcon: Icon(Icons.pin),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _confirmEmail,
                         style: ElevatedButton.styleFrom(
                           // backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                 ),
                               )
                             : Text(
                                 'sendCode',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     TextButton(
                       onPressed: () => setState(() => _codeSent = false),
-                      child: const Text("لم يصلك الرمز؟ إعادة الإرسال"),
+                      child: Text("لم يصلك الرمز؟ إعادة الإرسال"),
                     ),
                   ],
 
                   if (authState.error != null)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: EdgeInsets.only(bottom: 12),
                       child: Text(
                         authState.error!,
                         style: TextStyle(
@@ -282,17 +283,14 @@ class _ConfirmationEmailPageState extends State<ConfirmationEmailPage> {
                         ),
                       ),
                     ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   TextButton(
                     onPressed: () =>
                         Navigator.of(context).pushNamedAndRemoveUntil(
                           LoginPage.routeName,
                           (route) => false,
                         ),
-                    child: Text(
-                      'backToLogin',
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    child: Text('backToLogin', style: TextStyle(fontSize: 14)),
                   ),
                 ],
               ),

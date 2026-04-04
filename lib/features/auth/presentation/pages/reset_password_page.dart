@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 
@@ -20,35 +19,43 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       TextEditingController();
   bool _hidePassword = true;
 
-  InputDecoration getInputDecoration(String hint, IconData iconData) {
+  InputDecoration getInputDecoration(
+    String hint,
+    IconData iconData,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return InputDecoration(
       filled: true,
       // fillColor: kBackgroundColor,
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+      hintStyle: TextStyle(
+        color: colorScheme.onSurface.withOpacity(0.6),
+        fontSize: 14,
+      ),
       prefixIcon: Icon(
         iconData,
         // color:
         //  kTextLowBlackColor
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
-      border: const OutlineInputBorder(
+      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.white, width: 2),
+        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
       ),
-      enabledBorder: const OutlineInputBorder(
+      enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.white, width: 2),
+        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.white, width: 2),
+        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
       ),
-      errorBorder: const OutlineInputBorder(
+      errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Color(0xFFF65054), width: 2),
       ),
-      focusedErrorBorder: const OutlineInputBorder(
+      focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Color(0xFFF65054), width: 2),
       ),
@@ -74,6 +81,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final size = MediaQuery.of(context).size;
 
     return Directionality(
@@ -82,11 +91,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         builder: (context, authState) {
           final pendingEmail = authState.pendingEmail ?? '';
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: theme.scaffoldBackgroundColor,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              foregroundColor: Colors.black,
+              foregroundColor: colorScheme.onSurface,
             ),
             body: SingleChildScrollView(
               child: Padding(
@@ -101,15 +110,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       fit: BoxFit.contain,
                     ),
                     SizedBox(height: size.height * 0.04),
-                    const Text(
+                    Text(
                       'إنشاء كلمة مرور جديدة',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
+                    SizedBox(height: 8),
+                    Text(
                       'قم بإدخال كلمة المرور الجديدة',
                       style: TextStyle(fontSize: 16),
                     ),
@@ -118,7 +127,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       Text(
                         pendingEmail,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 14),
+                        style: TextStyle(fontSize: 14),
                       ),
                     SizedBox(height: size.height * 0.03),
                     Form(
@@ -131,6 +140,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             decoration: getInputDecoration(
                               'الرمز المرسل إليك',
                               Icons.security,
+                              theme,
+                              colorScheme,
                             ),
                             validator: (input) =>
                                 (input ?? '').isEmpty ? 'أدخل الرمز' : null,
@@ -143,6 +154,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                 getInputDecoration(
                                   'كلمة المرور الجديدة',
                                   Icons.lock,
+                                  theme,
+                                  colorScheme,
                                 ).copyWith(
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -166,6 +179,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             decoration: getInputDecoration(
                               'تأكيد كلمة المرور',
                               Icons.lock,
+                              theme,
+                              colorScheme,
                             ),
                             validator: (input) {
                               if (input != _passwordController.text) {
@@ -179,7 +194,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     ),
                     if (authState.error != null)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.only(bottom: 12),
                         child: Text(
                           authState.error!,
                           style: TextStyle(
@@ -193,20 +208,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       width: double.infinity,
                       height: size.height * 0.065,
                       child: authState.isLoading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? Center(child: CircularProgressIndicator())
                           : ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: kPrimaryColor,
+                                backgroundColor: colorScheme.primary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               onPressed: _submit,
-                              child: const Text(
+                              child: Text(
                                 'حفظ',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.white,
+                                  color: theme.scaffoldBackgroundColor,
                                 ),
                               ),
                             ),

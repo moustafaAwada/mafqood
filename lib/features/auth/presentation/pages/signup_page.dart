@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
@@ -59,33 +58,41 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (success) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ConfirmationEmailPage()),
+        MaterialPageRoute(builder: (context) => ConfirmationEmailPage()),
       );
     }
   }
 
-  InputDecoration _inputDecoration(String hint, IconData icon) {
+  InputDecoration _inputDecoration(
+    String hint,
+    IconData icon,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white,
-      prefixIcon: Icon(icon, color: primaryColor),
+      fillColor: theme.scaffoldBackgroundColor,
+      prefixIcon: Icon(icon, color: colorScheme.primary),
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.black38, fontSize: 14),
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 15),
+      hintStyle: TextStyle(
+        color: colorScheme.onSurface.withValues(alpha: 0.38),
+        fontSize: 14,
+      ),
+      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
       // Light border for clean look
       enabledBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: theme.dividerColor, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: primaryColor, width: 2),
       ),
-      errorBorder: const OutlineInputBorder(
+      errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Colors.redAccent, width: 1),
       ),
-      focusedErrorBorder: const OutlineInputBorder(
+      focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Colors.redAccent, width: 2),
       ),
@@ -94,6 +101,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return BlocBuilder<AuthCubit, AuthState>(
       buildWhen: (prev, curr) =>
           prev.isLoading != curr.isLoading || prev.error != curr.error,
@@ -101,17 +110,14 @@ class _SignUpPageState extends State<SignUpPage> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: theme.scaffoldBackgroundColor,
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 24,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Center(
                       child: Image.asset(
                         'assets/images/logo.jpg',
@@ -119,15 +125,15 @@ class _SignUpPageState extends State<SignUpPage> {
                         fit: BoxFit.contain,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     RichText(
                       textAlign: TextAlign.center,
-                      text: const TextSpan(
+                      text: TextSpan(
                         children: [
                           TextSpan(
                             text: 'مرحباً بك في ',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: colorScheme.onSurface,
                               fontSize: 20,
                               fontWeight: FontWeight.w500,
                             ),
@@ -143,15 +149,15 @@ class _SignUpPageState extends State<SignUpPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
+                    SizedBox(height: 4),
+                    Text(
                       'إنشاء حساب جديد',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -161,18 +167,22 @@ class _SignUpPageState extends State<SignUpPage> {
                             decoration: _inputDecoration(
                               'الاسم كاملاً',
                               Icons.person_outline,
+                              theme,
+                              colorScheme,
                             ),
                             validator: (v) =>
                                 (v ?? '').isEmpty ? 'الاسم مطلوب' : null,
                           ),
 
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: _inputDecoration(
                               'البريد الإلكتروني',
                               Icons.email_outlined,
+                              theme,
+                              colorScheme,
                             ),
                             validator: (v) =>
                                 !RegExp(
@@ -181,7 +191,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ? 'البريد الإلكتروني غير صالح'
                                 : null,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           TextFormField(
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
@@ -189,6 +199,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                 _inputDecoration(
                                   'رقم الهاتف',
                                   Icons.phone_android_outlined,
+                                  theme,
+                                  colorScheme,
                                 ).copyWith(
                                   prefixIcon: SizedBox(
                                     width: 70,
@@ -196,7 +208,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
-                                      children: const [
+                                      children: [
                                         Icon(Icons.arrow_drop_down),
                                         Text('+20'),
                                       ],
@@ -206,7 +218,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             validator: (v) =>
                                 (v ?? '').isEmpty ? 'رقم الهاتف مطلوب' : null,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _hidePassword,
@@ -214,13 +226,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                 _inputDecoration(
                                   'كلمة المرور',
                                   Icons.lock_outline,
+                                  theme,
+                                  colorScheme,
                                 ).copyWith(
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       _hidePassword
                                           ? Icons.visibility_off_outlined
                                           : Icons.visibility_outlined,
-                                      color: Colors.grey,
+                                      color: theme.dividerColor,
                                     ),
                                     onPressed: () => setState(
                                       () => _hidePassword = !_hidePassword,
@@ -231,20 +245,22 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ? 'كلمة المرور قصيرة جداً'
                                 : null,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           TextFormField(
                             controller: _confirmPasswordController,
                             obscureText: _hidePassword,
                             decoration: _inputDecoration(
                               'تأكيد كلمة المرور',
                               Icons.lock_outline,
+                              theme,
+                              colorScheme,
                             ),
                             validator: (v) => v != _passwordController.text
                                 ? 'كلمتا المرور غير متطابقتين'
                                 : null,
                           ),
                           if (authState.error != null) ...[
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Text(
                               authState.error!,
                               style: TextStyle(
@@ -253,7 +269,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                           ],
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           authState.isLoading
                               ? CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation(
@@ -266,56 +282,56 @@ class _SignUpPageState extends State<SignUpPage> {
                                   child: ElevatedButton(
                                     onPressed: _submit,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: kPrimaryColor,
+                                      backgroundColor: colorScheme.primary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'إنشاء حساب جديد',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: theme.scaffoldBackgroundColor,
                                       ),
                                     ),
                                   ),
                                 ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
                             height: 48,
                             child: OutlinedButton.icon(
                               onPressed: () {},
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: kPrimaryColor),
+                                side: BorderSide(color: colorScheme.primary),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                backgroundColor: Colors.white,
+                                backgroundColor: theme.scaffoldBackgroundColor,
                               ),
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.g_mobiledata,
                                 color: Colors.red,
                                 size: 28,
                               ),
-                              label: const Text(
+                              label: Text(
                                 'تسجيل دخول بواسطة جوجل',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: colorScheme.onSurface,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('هل لديك حساب بالفعل؟'),
+                              Text('هل لديك حساب بالفعل؟'),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: const Text(
+                                child: Text(
                                   'تسجيل الدخول',
                                   style: TextStyle(
                                     color: Color(0xFFFFA000),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mafqood/constants.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/signup_page.dart';
+import 'package:mafqood/features/main/presentation/main_shell_page.dart';
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/login';
@@ -18,9 +18,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool hidePassword = true;
-  final bool _rememberMe = false;
-
-  final Map<String, String> _authData = {'email': '', 'password': ''};
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -46,6 +43,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return BlocBuilder<AuthCubit, AuthState>(
       buildWhen: (prev, curr) =>
           prev.isLoading != curr.isLoading || prev.error != curr.error,
@@ -53,17 +52,14 @@ class _LoginPageState extends State<LoginPage> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: theme.scaffoldBackgroundColor,
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 24,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Center(
                       child: Image.asset(
                         'assets/images/logo.jpg',
@@ -71,15 +67,15 @@ class _LoginPageState extends State<LoginPage> {
                         fit: BoxFit.contain,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     RichText(
                       textAlign: TextAlign.center,
-                      text: const TextSpan(
+                      text: TextSpan(
                         children: [
                           TextSpan(
                             text: 'مرحباً بك في ',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: colorScheme.onSurface,
                               fontSize: 20,
                               fontWeight: FontWeight.w500,
                             ),
@@ -95,15 +91,15 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
+                    SizedBox(height: 4),
+                    Text(
                       'تسجيل الدخول',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -116,8 +112,9 @@ class _LoginPageState extends State<LoginPage> {
                                 !RegExp(r".+@.+\..+").hasMatch(input ?? '')
                                 ? 'بريد إلكتروني غير صالح'
                                 : null,
+                            theme: theme,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           _buildInputField(
                             controller: _passwordController,
                             label: 'كلمة المرور',
@@ -128,8 +125,9 @@ class _LoginPageState extends State<LoginPage> {
                             validator: (input) => (input ?? '').length < 3
                                 ? 'كلمة المرور قصيرة جداً'
                                 : null,
+                            theme: theme,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -138,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                                   context,
                                   ForgotPasswordPage.routeName,
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'نسيت كلمة المرور؟',
                                   style: TextStyle(
                                     color: Color(0xFFFFA000),
@@ -149,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           if (authState.error != null) ...[
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Text(
                               authState.error!,
                               style: TextStyle(
@@ -158,45 +156,54 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ],
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
                             height: 52,
                             child: authState.isLoading
-                                ? const Center(
+                                ? Center(
                                     child: CircularProgressIndicator(
-                                      color: kPrimaryColor,
+                                      color: colorScheme.primary,
                                     ),
                                   )
                                 : ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: kPrimaryColor,
+                                      backgroundColor: colorScheme.primary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    onPressed: _submit,
-                                    child: const Text(
+                                    // onPressed: _submit,
+                                    onPressed: () {
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MainShellPage(),
+                                        ),
+                                        (route) => false,
+                                      );
+                                    },
+                                    child: Text(
                                       'تسجيل الدخول',
                                       style: TextStyle(
                                         fontSize: 18,
-                                        color: Colors.white,
+                                        color: theme.scaffoldBackgroundColor,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('لا يوجد لديك حساب؟'),
+                              Text('لا يوجد لديك حساب؟'),
                               TextButton(
                                 onPressed: () => Navigator.pushNamed(
                                   context,
                                   SignUpPage.routeName,
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'إنشاء حساب جديد',
                                   style: TextStyle(
                                     color: Color(0xFFFFA000),
@@ -218,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               'التحقق من البريد الإلكتروني!',
                               style: TextStyle(
-                                color: Colors.grey.shade500,
+                                color: theme.scaffoldBackgroundColor,
                                 fontSize: 12,
                               ),
                             ),
@@ -244,11 +251,12 @@ class _LoginPageState extends State<LoginPage> {
     VoidCallback? onTogglePassword,
     String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
+    required ThemeData theme,
   }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFBDBDBD)),
+        border: Border.all(color: Color(0xFFBDBDBD)),
       ),
       child: TextFormField(
         controller: controller,
@@ -258,15 +266,12 @@ class _LoginPageState extends State<LoginPage> {
         decoration: InputDecoration(
           hintText: label,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
                     hidePassword ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey.shade600,
+                    color: theme.dividerColor.withOpacity(0.6),
                   ),
                   onPressed: onTogglePassword,
                 )

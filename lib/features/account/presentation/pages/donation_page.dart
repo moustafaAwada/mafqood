@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 class DonationPage extends StatefulWidget {
   const DonationPage({super.key});
@@ -17,70 +16,89 @@ class _DonationPageState extends State<DonationPage> {
     '100 ج.م',
     '200 ج.م',
     '500 ج.م',
-    'مبلغ اخر',
+    'مبلغ آخر',
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+          centerTitle: true,
+          title: Text(
+            'دعم المنصة',
+            style: TextStyle(
+              color: colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
-          title: const Text(
-            'التبرع',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary, size: 20),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             children: [
-              // ── Top Icon ──
+              // ── Header Icon ──
               Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE8F1FC),
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.05),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.volunteer_activism,
-                  size: 50,
-                  color: kPrimaryColor,
+                child: Center(
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.volunteer_activism_rounded,
+                      size: 45,
+                      color: colorScheme.primary,
+                    ),
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
 
               // ── Titles ──
-              const Text(
-                'ساهم في اعاده المفقودين',
+              Text(
+                'شارك في لم شمل العائلات',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'تبرعك يساعدنا في تطوير المنصه والوصول لاكبر عدد من الناس',
+              const SizedBox(height: 12),
+              Text(
+                'تبرعك البسيط يساعدنا في تطوير تقنيات البحث والوصول لأكبر عدد من المفقودين حول العالم.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.black54,
+                  color: colorScheme.onSurface.withOpacity(0.6),
+                  height: 1.6,
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
 
-              // ── Grid of Amounts ──
+              // ── Amount Grid ──
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -95,33 +113,30 @@ class _DonationPageState extends State<DonationPage> {
                   final isSelected = _selectedIndex == index;
                   return GestureDetector(
                     onTap: () => setState(() => _selectedIndex = index),
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
+                        color: isSelected ? colorScheme.primary : colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected
-                              ? kPrimaryColor
-                              : Colors.grey.shade300,
-                          width: isSelected ? 2 : 1,
+                          color: isSelected ? colorScheme.primary : theme.dividerColor.withOpacity(0.1),
+                          width: 1.5,
                         ),
-                        boxShadow: [
-                          if (!isSelected)
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                        ],
+                        boxShadow: isSelected ? [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          )
+                        ] : null,
                       ),
                       child: Text(
                         _amounts[index],
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? kPrimaryColor : Colors.black87,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -129,74 +144,81 @@ class _DonationPageState extends State<DonationPage> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
               // ── Submit Button ──
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('شكرًا لتبرعك!'),
-                        backgroundColor: Color(0xFF4CAF50),
+                      SnackBar(
+                        content: const Text('شكرًا جزيلاً لمساهمتك النبيلة!'),
+                        backgroundColor: Colors.green.shade600,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     );
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimaryColor,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'إتمام التبرع',
+                    'تأكيد التبرع',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
 
               // ── Impact Section ──
-              const Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'اثر تبرعك',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'أثر مساهمتك',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               const _ImpactItem(
-                amount: '10 ج.م',
-                desc: 'نساعد في نشر بلاغ واحد',
-                icon: Icons.search,
+                title: 'توسيع نطاق البحث',
+                desc: 'نشر البلاغ المفقود في مناطق جغرافية أوسع بمساعدة الذكاء الاصطناعي.',
+                icon: Icons.radar_rounded,
               ),
               const _ImpactItem(
-                amount: '50 ج.م',
-                desc: 'ترسل تنبيهات ل 1000 شخص',
-                icon: Icons.notifications_none,
+                title: 'تنبيهات فورية',
+                desc: 'إرسال إشعارات عاجلة لآلاف المستخدمين في محيط المفقود.',
+                icon: Icons.speed_rounded,
               ),
               const _ImpactItem(
-                amount: '100 ج.م',
-                desc: 'تفعل خاصيه البحث بالذكاء الاصطناعي',
-                icon: Icons.psychology,
-              ),
-              const _ImpactItem(
-                amount: '500 ج.م',
-                desc: 'ندعم عائله كامله لمده شهر',
-                icon: Icons.groups_outlined,
+                title: 'دعم عائلات المفقودين',
+                desc: 'توفير خدمات استشارية ودعم نفسي للعائلات المتضررة مجاناً.',
+                icon: Icons.favorite_rounded,
               ),
             ],
           ),
@@ -207,55 +229,55 @@ class _DonationPageState extends State<DonationPage> {
 }
 
 class _ImpactItem extends StatelessWidget {
-  final String amount;
+  final String title;
   final String desc;
   final IconData icon;
 
   const _ImpactItem({
-    required this.amount,
+    required this.title,
     required this.desc,
     required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  amount,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                Text(
-                  desc,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8F1FC),
+              color: colorScheme.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: kPrimaryColor,
-              size: 28,
+            child: Icon(icon, color: colorScheme.primary, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: colorScheme.onSurface.withOpacity(0.5),
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

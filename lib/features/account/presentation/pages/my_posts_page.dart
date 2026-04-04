@@ -1,109 +1,148 @@
 import 'package:flutter/material.dart';
-import 'package:mafqood/constants.dart';
 
 class MyPostsPage extends StatelessWidget {
   const MyPostsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final posts = [
       _PostData(
-        userName: 'Mostafa Alfy',
+        userName: 'مصطفى الألفي',
         status: 'مفقود',
-        statusColor: const Color(0xFFFF5252),
-        description: 'الاسم: علي عمر صالح , العنوان: قنا -الشؤون, رقم التل..',
+        isMissing: true,
+        description:
+            'الاسم: علي عمر صالح، المفقود في قنا الخمسين، يرتدي قميصاً أزرق، يرجى التواصل في حال العثور عليه.',
         likes: 25,
-        dislikes: 2,
         comments: 16,
+        time: 'منذ ساعتين',
       ),
       _PostData(
-        userName: 'Mostafa Nasser',
-        status: 'موجود',
-        statusColor: const Color(0xFF4CAF50),
-        description: 'الاسم: علي عمر صالح , العنوان: قنا -الشؤون, رقم التل..',
-        likes: 25,
-        dislikes: 2,
-        comments: 16,
-      ),
-      _PostData(
-        userName: 'Mostafa Alfy',
-        status: 'موجود',
-        statusColor: const Color(0xFF4CAF50),
-        description: 'الاسم: علي عمر صالح , العنوان: قنا -الشؤون, رقم التل..',
-        likes: 25,
-        dislikes: 2,
-        comments: 16,
+        userName: 'مصطفى الألفي',
+        status: 'تم العثور',
+        isMissing: false,
+        description:
+            'شكراً للجميع، تم العثور على المفقود وهو الآن بصحة جيدة مع عائلته.',
+        likes: 142,
+        comments: 48,
+        time: 'منذ يومين',
       ),
     ];
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: colorScheme.primary,
           elevation: 0,
           centerTitle: true,
-          title: const Text(
+          title: Text(
             'منشوراتي',
             style: TextStyle(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            icon: Icon(
+              Icons.arrow_forward_ios,
+              color: colorScheme.onPrimary,
+              size: 20,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
         body: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
-            // ── User profile + stats header ──
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Color(0xFFE0F7FA),
-                  child: Text(
-                    'M',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
+            // ── User Summary Header ──
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.01),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: colorScheme.primary.withOpacity(0.1),
+                    child: Text(
+                      'M',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Mostafa Alfy',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'مصطفى الألفي',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: const [
-                          _StatItem(label: 'منشوراتي', value: '3'),
-                          SizedBox(width: 20),
-                          _StatItem(label: 'مفقود', value: '2'),
-                          SizedBox(width: 20),
-                          _StatItem(label: 'موجود', value: '1'),
-                        ],
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            _StatItem(label: 'المنشورات', value: '3'),
+                            _verticalDivider(theme),
+                            _StatItem(label: 'مفقود', value: '1'),
+                            _verticalDivider(theme),
+                            _StatItem(label: 'موجود', value: '2'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'تاريخ النشر',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // ── Posts list ──
             ...posts.map((post) => _MyPostCard(data: post)),
@@ -112,279 +151,163 @@ class MyPostsPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _verticalDivider(ThemeData theme) => Container(
+    height: 15,
+    width: 1,
+    margin: const EdgeInsets.symmetric(horizontal: 16),
+    color: theme.dividerColor.withOpacity(0.2),
+  );
 }
 
-// ── Stat item (e.g. منشوراتي 3) ──
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
-
   const _StatItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: const TextStyle(color: Colors.black54, fontSize: 12),
-        ),
-        const SizedBox(height: 2),
-        Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 15,
+            color: colorScheme.primary,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: colorScheme.onSurface.withOpacity(0.4),
+            fontSize: 11,
+          ),
         ),
       ],
     );
   }
 }
 
-// ── Post data model ──
 class _PostData {
   final String userName;
   final String status;
-  final Color statusColor;
+  final bool isMissing;
   final String description;
   final int likes;
-  final int dislikes;
   final int comments;
+  final String time;
 
   _PostData({
     required this.userName,
     required this.status,
-    required this.statusColor,
+    required this.isMissing,
     required this.description,
     required this.likes,
-    required this.dislikes,
     required this.comments,
+    required this.time,
   });
 }
 
-// ── Post card widget ──
-class _MyPostCard extends StatefulWidget {
+class _MyPostCard extends StatelessWidget {
   final _PostData data;
-
   const _MyPostCard({required this.data});
 
   @override
-  State<_MyPostCard> createState() => _MyPostCardState();
-}
-
-class _MyPostCardState extends State<_MyPostCard> {
-  late int _likes;
-  late int _dislikes;
-  bool _isLiked = false;
-  bool _isDisliked = false;
-  bool _expanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _likes = widget.data.likes;
-    _dislikes = widget.data.dislikes;
-  }
-
-  void _toggleLike() {
-    setState(() {
-      if (_isLiked) {
-        _isLiked = false;
-        _likes--;
-      } else {
-        _isLiked = true;
-        _likes++;
-        if (_isDisliked) {
-          _isDisliked = false;
-          _dislikes--;
-        }
-      }
-    });
-  }
-
-  void _toggleDislike() {
-    setState(() {
-      if (_isDisliked) {
-        _isDisliked = false;
-        _dislikes--;
-      } else {
-        _isDisliked = true;
-        _dislikes++;
-        if (_isLiked) {
-          _isLiked = false;
-          _likes--;
-        }
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final data = widget.data;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final statusColor = data.isMissing
+        ? colorScheme.error
+        : const Color(0xFF4CAF50);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header: avatar + name + status ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: const Color(0xFFE0F7FA),
-                  child: Text(
-                    data.userName.isNotEmpty ? data.userName[0] : '?',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
-                      fontSize: 14,
-                    ),
-                  ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    data.userName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const Icon(Icons.access_time, size: 16, color: Colors.black38),
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+                child: Text(
+                  data.status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
                   ),
-                  decoration: BoxDecoration(
-                    color: data.statusColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    data.status,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Description with see more ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: GestureDetector(
-              onTap: () => setState(() => _expanded = !_expanded),
-              child: RichText(
-                maxLines: _expanded ? 10 : 1,
-                overflow: TextOverflow.ellipsis,
-                textDirection: TextDirection.rtl,
-                text: TextSpan(
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 13,
-                  ),
-                  children: [
-                    TextSpan(text: data.description),
-                    if (!_expanded)
-                      const TextSpan(
-                        text: ' see more',
-                        style: TextStyle(
-                          color: Colors.black45,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                  ],
                 ),
               ),
-            ),
+              const Spacer(),
+              Text(
+                data.time,
+                style: TextStyle(
+                  color: colorScheme.onSurface.withOpacity(0.3),
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.more_horiz,
+                color: colorScheme.onSurface.withOpacity(0.3),
+                size: 20,
+              ),
+            ],
           ),
-
-          const SizedBox(height: 8),
-
-          // ── Post image placeholder ──
-          Container(
-            height: 180,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
+          const SizedBox(height: 14),
+          Text(
+            data.description,
+            style: TextStyle(
+              fontSize: 14,
+              color: colorScheme.onSurface.withOpacity(0.8),
+              height: 1.5,
             ),
-            child: Icon(
-              Icons.image_outlined,
-              size: 48,
-              color: Colors.grey.shade400,
-            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-
-          // ── Action bar ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                // Like
-                _ActionButton(
-                  icon: _isLiked
-                      ? Icons.thumb_up_alt
-                      : Icons.thumb_up_alt_outlined,
-                  count: _likes,
-                  isActive: _isLiked,
-                  activeColor: kPrimaryColor,
-                  onTap: _toggleLike,
-                ),
-                const SizedBox(width: 16),
-                // Dislike
-                _ActionButton(
-                  icon: _isDisliked
-                      ? Icons.thumb_down_alt
-                      : Icons.thumb_down_alt_outlined,
-                  count: _dislikes,
-                  isActive: _isDisliked,
-                  activeColor: const Color(0xFFFF5252),
-                  onTap: _toggleDislike,
-                ),
-                const SizedBox(width: 16),
-                // Comments
-                _ActionButton(
-                  icon: Icons.chat_bubble_outline,
-                  count: widget.data.comments,
-                  isActive: false,
-                  activeColor: Colors.black54,
-                  onTap: () {
-                    // TODO: open comments
-                  },
-                ),
-                const Spacer(),
-                // Share
-                GestureDetector(
-                  onTap: () {
-                    // TODO: share post
-                  },
-                  child: const Icon(
-                    Icons.send_outlined,
-                    size: 20,
-                    color: kPrimaryColor,
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 16),
+          // Actions
+          Row(
+            children: [
+              _ActionItem(
+                icon: Icons.favorite_border_rounded,
+                count: data.likes,
+              ),
+              const SizedBox(width: 20),
+              _ActionItem(
+                icon: Icons.chat_bubble_outline_rounded,
+                count: data.comments,
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.edit_outlined, size: 16),
+                label: const Text('تعديل', style: TextStyle(fontSize: 12)),
+              ),
+            ],
           ),
         ],
       ),
@@ -392,44 +315,27 @@ class _MyPostCardState extends State<_MyPostCard> {
   }
 }
 
-// ── Small action button (like, dislike, comment) ──
-class _ActionButton extends StatelessWidget {
+class _ActionItem extends StatelessWidget {
   final IconData icon;
   final int count;
-  final bool isActive;
-  final Color activeColor;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.count,
-    required this.isActive,
-    required this.activeColor,
-    required this.onTap,
-  });
+  const _ActionItem({required this.icon, required this.count});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: isActive ? activeColor : Colors.black45,
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: colorScheme.onSurface.withOpacity(0.4)),
+        const SizedBox(width: 6),
+        Text(
+          count.toString(),
+          style: TextStyle(
+            fontSize: 13,
+            color: colorScheme.onSurface.withOpacity(0.4),
+            fontWeight: FontWeight.w600,
           ),
-          const SizedBox(width: 4),
-          Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 13,
-              color: isActive ? activeColor : Colors.black54,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

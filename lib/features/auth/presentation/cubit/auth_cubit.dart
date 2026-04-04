@@ -9,11 +9,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit({required AuthRepository authRepository})
     : _authRepository = authRepository,
-      super(const AuthState());
-
-  void _handleSessionExpired() {
-    emit(state.copyWith(user: User.empty, status: AuthStatus.unauthenticated));
-  }
+      super(AuthState());
 
   Future<void> initialize() async {
     emit(state.copyWith(status: AuthStatus.loading));
@@ -241,7 +237,7 @@ class AuthCubit extends Cubit<AuthState> {
       await _authRepository.logout();
     } catch (_) {
     } finally {
-      emit(const AuthState(status: AuthStatus.unauthenticated));
+      emit(AuthState(status: AuthStatus.unauthenticated));
     }
   }
 

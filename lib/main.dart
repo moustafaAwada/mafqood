@@ -11,9 +11,12 @@ import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/signup_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/splash_page.dart';
+import 'package:mafqood/core/theme/cubit/theme_cubit.dart';
+import 'package:mafqood/core/theme/cubit/theme_state.dart';
+import 'package:mafqood/core/theme/app_theme.dart';
 
 void main() {
-  runApp(const MafqoodApp());
+  runApp(MafqoodApp());
 }
 
 class MafqoodApp extends StatelessWidget {
@@ -26,19 +29,33 @@ class MafqoodApp extends StatelessWidget {
         remote: AuthRemoteDataSourceImpl(),
         local: AuthLocalDataSourceImpl(),
       ),
-      child: BlocProvider<AuthCubit>(
-        create: (context) =>
-            AuthCubit(authRepository: context.read<AuthRepository>()),
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: const SplashPage(),
-          routes: {
-            SignUpPage.routeName: (ctx) => const SignUpPage(),
-            LoginPage.routeName: (ctx) => const LoginPage(),
-            ForgotPasswordPage.routeName: (ctx) => const ForgotPasswordPage(),
-            ResetPasswordPage.routeName: (ctx) => const ResetPasswordPage(),
-            ConfirmationEmailPage.routeName: (ctx) =>
-                const ConfirmationEmailPage(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (context) =>
+                AuthCubit(authRepository: context.read<AuthRepository>()),
+          ),
+          BlocProvider<ThemeCubit>(
+            create: (context) => ThemeCubit(),
+          ),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, themeState) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              home: SplashPage(),
+              routes: {
+                SignUpPage.routeName: (ctx) => SignUpPage(),
+                LoginPage.routeName: (ctx) => LoginPage(),
+                ForgotPasswordPage.routeName: (ctx) => ForgotPasswordPage(),
+                ResetPasswordPage.routeName: (ctx) => ResetPasswordPage(),
+                ConfirmationEmailPage.routeName: (ctx) =>
+                    ConfirmationEmailPage(),
+              },
+            );
           },
         ),
       ),

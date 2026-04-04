@@ -10,14 +10,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String phoneNumber,
     required String password,
   }) async {
-    throw const ServerException(
+    throw ServerException(
       'Auth API not configured. Implement AuthRemoteDataSourceImpl with your backend.',
     );
   }
 
   @override
   Future<String> resendConfirmationEmail({required String email}) async {
-    throw const ServerException('Auth API not configured.');
+    throw ServerException('Auth API not configured.');
   }
 
   @override
@@ -25,7 +25,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String userId,
     required String code,
   }) async {
-    throw const ServerException('Auth API not configured.');
+    throw ServerException('Auth API not configured.');
   }
 
   @override
@@ -33,12 +33,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    throw const ServerException('Auth API not configured.');
+    throw ServerException('Auth API not configured.');
   }
 
   @override
   Future<ForgetPasswordResponse> forgetPassword({required String email}) async {
-    throw const ServerException('Auth API not configured.');
+    throw ServerException('Auth API not configured.');
   }
 
   @override
@@ -47,7 +47,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String code,
     required String newPassword,
   }) async {
-    throw const ServerException('Auth API not configured.');
+    throw ServerException('Auth API not configured.');
   }
 
   @override
