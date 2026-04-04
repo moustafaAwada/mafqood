@@ -47,11 +47,7 @@ class MemberLocationPage extends StatelessWidget {
         body: Stack(
           children: [
             // ── Background Mock Map ──
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _MockMapPainter(),
-              ),
-            ),
+            Positioned.fill(child: CustomPaint(painter: _MockMapPainter())),
 
             // ── User Avatar on Map ──
             Positioned(
@@ -82,10 +78,7 @@ class MemberLocationPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.green,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                       ),
                     ),
                   ),
@@ -98,7 +91,10 @@ class MemberLocationPage extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               child: Container(
                 margin: const EdgeInsets.fromLTRB(16, 0, 16, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 20,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -178,7 +174,6 @@ class MemberLocationPage extends StatelessWidget {
   }
 }
 
-/// A simple painter to draw some lines simulating a map background
 class _MockMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -188,11 +183,23 @@ class _MockMapPainter extends CustomPainter {
       ..strokeCap = StrokeCap.square;
 
     // Draw some mock roads
-    canvas.drawLine(const Offset(-100, 100), Offset(size.width + 100, size.height * 0.4), paint);
-    canvas.drawLine(Offset(size.width * 0.2, -100), Offset(size.width * 0.8, size.height + 100), paint);
+    canvas.drawLine(
+      const Offset(-100, 100),
+      Offset(size.width + 100, size.height * 0.4),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.2, -100),
+      Offset(size.width * 0.8, size.height + 100),
+      paint,
+    );
     paint.strokeWidth = 14;
-    canvas.drawLine(Offset(size.width * 0.5, size.height * 0.3), Offset(size.width * 0.9, size.height + 100), paint);
-    
+    canvas.drawLine(
+      Offset(size.width * 0.5, size.height * 0.3),
+      Offset(size.width * 0.9, size.height + 100),
+      paint,
+    );
+
     // Add a few placeholder location pins
     final pinPaint = Paint()..color = Colors.blueGrey;
     canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.5), 8, pinPaint);

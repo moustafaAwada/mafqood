@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mafqood/constants.dart';
+import 'package:mafqood/features/account/presentation/pages/member_details_page.dart';
 
 class ActiveFamilyCarePage extends StatelessWidget {
   const ActiveFamilyCarePage({super.key});
@@ -189,8 +190,9 @@ class ActiveFamilyCarePage extends StatelessWidget {
                             const CircleAvatar(
                               radius: 26,
                               backgroundColor: Colors.grey,
-                              backgroundImage:
-                                  NetworkImage('https://i.pravatar.cc/150?img=11'),
+                              backgroundImage: NetworkImage(
+                                'https://i.pravatar.cc/150?img=11',
+                              ),
                             ),
                             Positioned(
                               bottom: 0,
@@ -257,20 +259,21 @@ class ActiveFamilyCarePage extends StatelessWidget {
                           child: SizedBox(
                             height: 44,
                             child: ElevatedButton.icon(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFCDD2),
-                                  foregroundColor: Colors.red,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFCDD2),
+                                foregroundColor: Colors.red,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                icon: const Icon(Icons.delete_outline, size: 20),
-                                label: const Text(
-                                  'الغاء الدعوه',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )),
+                              ),
+                              icon: const Icon(Icons.delete_outline, size: 20),
+                              label: const Text(
+                                'الغاء الدعوه',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -278,20 +281,21 @@ class ActiveFamilyCarePage extends StatelessWidget {
                           child: SizedBox(
                             height: 44,
                             child: ElevatedButton.icon(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFE8F1FC),
-                                  foregroundColor: Colors.black87,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFE8F1FC),
+                                foregroundColor: Colors.black87,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                icon: const Icon(Icons.refresh, size: 20),
-                                label: const Text(
-                                  'إعاده إرسال',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )),
+                              ),
+                              icon: const Icon(Icons.refresh, size: 20),
+                              label: const Text(
+                                'إعاده إرسال',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -323,7 +327,6 @@ class _ActiveMemberCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -335,61 +338,79 @@ class _ActiveMemberCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Avatar
-          Stack(
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundColor: Colors.grey,
-                backgroundImage:
-                    NetworkImage('https://i.pravatar.cc/150?img=11'),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
-                  ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MemberDetailsPage(
+                  memberName: name,
+                  memberImage: imagePath,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          // Info list
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
+                // Avatar
+                Stack(
+                  children: [
+                    const CircleAvatar(
+                      radius: 26,
+                      backgroundColor: Colors.grey,
+                      backgroundImage: NetworkImage(
+                        'https://i.pravatar.cc/150?img=11',
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
+                const SizedBox(width: 12),
+                // Info list
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

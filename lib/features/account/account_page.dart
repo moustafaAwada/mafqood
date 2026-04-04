@@ -4,6 +4,8 @@ import 'package:mafqood/features/account/presentation/pages/edit_profile_page.da
 import 'package:mafqood/features/account/presentation/pages/family_care_page.dart';
 import 'package:mafqood/features/account/presentation/pages/my_posts_page.dart';
 import 'package:mafqood/features/account/presentation/pages/saved_posts_page.dart';
+import 'package:mafqood/features/account/presentation/pages/settings_page.dart';
+import 'package:mafqood/features/account/presentation/pages/donation_page.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
@@ -139,7 +141,10 @@ class AccountPage extends StatelessWidget {
               icon: Icons.settings_outlined,
               label: 'الإعدادات',
               onTap: () {
-                // TODO: Navigate to settings
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsPage()),
+                );
               },
             ),
             _AccountItem(
@@ -153,7 +158,10 @@ class AccountPage extends StatelessWidget {
               icon: Icons.volunteer_activism_outlined,
               label: 'التبرع',
               onTap: () {
-                // TODO: Navigate to donations
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DonationPage()),
+                );
               },
             ),
             const SizedBox(height: 24),
