@@ -7,53 +7,47 @@ class ServerException implements Exception {
   ServerException({required this.errorModel});
 }
 
+ErrorModel _parseErrorModel(dynamic data, int? statusCode, String? message) {
+  if (data is Map<String, dynamic>) {
+    try {
+      return ErrorModel.fromJson(data);
+    } catch (_) {
+      return ErrorModel(
+        status: statusCode ?? -1,
+        errorMessage: message ?? 'حدث خطأ غير معروف',
+      );
+    }
+  }
+
+  if (data is String && data.isNotEmpty) {
+    return ErrorModel(status: statusCode ?? -1, errorMessage: data);
+  }
+
+  return ErrorModel(
+    status: statusCode ?? -1,
+    errorMessage: message ?? 'حدث خطأ غير معروف',
+  );
+}
+
 void handleDioException(DioException e) {
+  final statusCode = e.response?.statusCode;
+  final data = e.response?.data;
+  final message = e.message;
+
   switch (e.type) {
     case DioExceptionType.connectionTimeout:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.sendTimeout:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.receiveTimeout:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.badCertificate:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
-    case DioExceptionType.badResponse:
-      switch (e.response?.statusCode) {
-        case 400:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-        case 401:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-        case 403:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-        case 404:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-        case 409:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-        case 422:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-        case 502:
-          throw ServerException(
-            errorModel: ErrorModel.fromJson(e.response!.data),
-          );
-      }
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.cancel:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.connectionError:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
     case DioExceptionType.unknown:
-      throw ServerException(errorModel: ErrorModel.fromJson(e.response!.data));
+      throw ServerException(
+        errorModel: _parseErrorModel(data, statusCode, message),
+      );
+    case DioExceptionType.badResponse:
+      throw ServerException(
+        errorModel: _parseErrorModel(data, statusCode, message),
+      );
   }
 }

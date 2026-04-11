@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:mafqood/core/api/api_consumer.dart';
+import 'package:mafqood/core/api/end_points.dart';
 import 'package:mafqood/core/error/exceptions.dart';
 
 class DioConsumer extends ApiConsumer {
   final Dio dio;
 
   DioConsumer({required this.dio}) {
-    dio.options.baseUrl = '';
+    dio.options.baseUrl = EndPoints.baseUrl;
 
     dio.interceptors.add(
       LogInterceptor(
