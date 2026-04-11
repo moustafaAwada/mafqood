@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/features/auth/domain/entities/auth_results.dart';
 import 'package:mafqood/features/auth/domain/entities/user.dart';
 import 'package:mafqood/features/auth/domain/repositories/auth_repository.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
@@ -9,7 +10,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit({required AuthRepository authRepository})
     : _authRepository = authRepository,
-      super(AuthState());
+      super(const AuthState());
 
   Future<void> initialize() async {
     emit(state.copyWith(status: AuthStatus.loading));
@@ -23,15 +24,20 @@ class AuthCubit extends Cubit<AuthState> {
             state.copyWith(
               status: AuthStatus.authenticated,
               user: User.fromJson(userData),
+              clearError: true,
             ),
           );
           return;
         }
       }
-      emit(state.copyWith(status: AuthStatus.unauthenticated));
+      emit(
+        state.copyWith(status: AuthStatus.unauthenticated, clearError: true),
+      );
     } catch (e) {
       debugPrint('Auth init error: $e');
-      emit(state.copyWith(status: AuthStatus.unauthenticated));
+      emit(
+        state.copyWith(status: AuthStatus.unauthenticated, clearError: true),
+      );
     }
   }
 
@@ -41,154 +47,110 @@ class AuthCubit extends Cubit<AuthState> {
     required String phoneNumber,
     required String password,
   }) async {
-    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    _emitLoading();
 
-    try {
-      final result = await _authRepository.register(
-        name: name,
-        email: email,
-        phoneNumber: phoneNumber,
-        password: password,
-      );
-      emit(
-        state.copyWith(
-          status: AuthStatus.unauthenticated,
-          pendingUserId: result.userId,
-        ),
-      );
-      return true;
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: _extractErrorMessage(e),
-        ),
-      );
-      return false;
-    }
+    final result = await _authRepository.register(
+      name: name,
+      email: email,
+      phoneNumber: phoneNumber,
+      password: password,
+    );
+
+    return result.fold(
+      (failure) {
+        _emitError(failure.message);
+        return false;
+      },
+      (registerResult) {
+        _emitUnauthenticated(
+          pendingUserId: registerResult.userId,
+          clearPendingEmail: true,
+        );
+        return true;
+      },
+    );
   }
 
   Future<bool> resendConfirmationEmail({required String email}) async {
-    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    _emitLoading();
 
-    try {
-      final userId = await _authRepository.resendConfirmationEmail(
-        email: email,
-      );
-      emit(
-        state.copyWith(
-          status: AuthStatus.unauthenticated,
-          pendingUserId: userId,
-        ),
-      );
-      return true;
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: _extractErrorMessage(e),
-        ),
-      );
-      return false;
-    }
+    final result = await _authRepository.resendConfirmationEmail(email: email);
+
+    return result.fold(
+      (failure) {
+        _emitError(failure.message);
+        return false;
+      },
+      (userId) {
+        _emitUnauthenticated(pendingUserId: userId, clearPendingEmail: true);
+        return true;
+      },
+    );
   }
 
   Future<bool> confirmEmail({required String code}) async {
     if (state.pendingUserId == null) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: 'لا يوجد مستخدم في انتظار التأكيد',
-        ),
-      );
+      _emitError('لا يوجد مستخدم في انتظار التأكيد');
       return false;
     }
 
-    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    _emitLoading();
 
-    try {
-      final result = await _authRepository.confirmEmail(
-        userId: state.pendingUserId!,
-        code: code,
-      );
-      emit(
-        state.copyWith(
-          status: AuthStatus.authenticated,
-          user: User(
-            id: result.id,
-            email: result.email,
-            name: result.name,
-            phoneNumber: result.phoneNumber,
-          ),
-          clearPendingUserId: true,
-        ),
-      );
-      return true;
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: _extractErrorMessage(e),
-        ),
-      );
-      return false;
-    }
+    final result = await _authRepository.confirmEmail(
+      userId: state.pendingUserId!,
+      code: code,
+    );
+
+    return result.fold(
+      (failure) {
+        _emitError(failure.message);
+        return false;
+      },
+      (userResult) {
+        _emitAuthenticated(userResult);
+        return true;
+      },
+    );
   }
 
   Future<bool> login({required String email, required String password}) async {
-    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    _emitLoading();
 
-    try {
-      final result = await _authRepository.login(
-        email: email,
-        password: password,
-      );
-      emit(
-        state.copyWith(
-          status: AuthStatus.authenticated,
-          user: User(
-            id: result.id,
-            email: result.email,
-            name: result.name,
-            phoneNumber: result.phoneNumber,
-          ),
-        ),
-      );
-      return true;
-    } catch (e) {
-      final errorMsg = _extractErrorMessage(e);
-      final displayError =
-          errorMsg.contains(
-            'The device you are trying to login from is not recognized',
-          )
-          ? 'عذراً، هذا الجهاز غير معروف. يرجى تسجيل الدخول من جهازك المسجل أو إخبار مسؤولين السنتر بالمشكلة'
-          : errorMsg;
-      emit(state.copyWith(status: AuthStatus.error, error: displayError));
-      return false;
-    }
+    final result = await _authRepository.login(
+      email: email,
+      password: password,
+    );
+
+    return result.fold(
+      (failure) {
+        _emitError(failure.message);
+        return false;
+      },
+      (userResult) {
+        _emitAuthenticated(userResult);
+        return true;
+      },
+    );
   }
 
   Future<bool> forgetPassword({required String email}) async {
-    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    _emitLoading();
 
-    try {
-      final result = await _authRepository.forgetPassword(email: email);
-      emit(
-        state.copyWith(
-          status: AuthStatus.unauthenticated,
-          pendingEmail: result.email,
-        ),
-      );
-      return true;
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: _extractErrorMessage(e),
-        ),
-      );
-      return false;
-    }
+    final result = await _authRepository.forgetPassword(email: email);
+
+    return result.fold(
+      (failure) {
+        _emitError(failure.message);
+        return false;
+      },
+      (forgetResult) {
+        _emitUnauthenticated(
+          pendingEmail: forgetResult.email,
+          clearPendingUserId: true,
+        );
+        return true;
+      },
+    );
   }
 
   Future<bool> resetPassword({
@@ -196,39 +158,28 @@ class AuthCubit extends Cubit<AuthState> {
     required String newPassword,
   }) async {
     if (state.pendingEmail == null) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: 'لا يوجد بريد إلكتروني في انتظار إعادة التعيين',
-        ),
-      );
+      _emitError('لا يوجد بريد إلكتروني في انتظار إعادة التعيين');
       return false;
     }
 
-    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    _emitLoading();
 
-    try {
-      await _authRepository.resetPassword(
-        email: state.pendingEmail!,
-        code: code,
-        newPassword: newPassword,
-      );
-      emit(
-        state.copyWith(
-          status: AuthStatus.unauthenticated,
-          clearPendingEmail: true,
-        ),
-      );
-      return true;
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: _extractErrorMessage(e),
-        ),
-      );
-      return false;
-    }
+    final result = await _authRepository.resetPassword(
+      email: state.pendingEmail!,
+      code: code,
+      newPassword: newPassword,
+    );
+
+    return result.fold(
+      (failure) {
+        _emitError(failure.message);
+        return false;
+      },
+      (_) {
+        _emitUnauthenticated(clearPendingEmail: true, clearPendingUserId: true);
+        return true;
+      },
+    );
   }
 
   Future<void> logout() async {
@@ -237,31 +188,66 @@ class AuthCubit extends Cubit<AuthState> {
       await _authRepository.logout();
     } catch (_) {
     } finally {
-      emit(AuthState(status: AuthStatus.unauthenticated));
+      emit(const AuthState(status: AuthStatus.unauthenticated));
     }
   }
 
   void clearError() => emit(state.copyWith(clearError: true));
+
   void setPendingUserId(String userId) =>
-      emit(state.copyWith(pendingUserId: userId));
+      emit(state.copyWith(pendingUserId: userId, clearError: true));
+
   void setPendingEmail(String email) =>
-      emit(state.copyWith(pendingEmail: email));
+      emit(state.copyWith(pendingEmail: email, clearError: true));
 
   void updateUser({String? name, String? phoneNumber}) {
     if (state.user.isEmpty) return;
     emit(
       state.copyWith(
-        user: User(
-          id: state.user.id,
-          email: state.user.email,
-          name: name ?? state.user.name,
-          phoneNumber: phoneNumber ?? state.user.phoneNumber,
-        ),
+        user: state.user.copyWith(name: name, phoneNumber: phoneNumber),
+        clearError: true,
       ),
     );
   }
 
-  String _extractErrorMessage(Object e) {
-    return e.toString();
+  void _emitLoading() =>
+      emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+
+  void _emitError(String message) =>
+      emit(state.copyWith(status: AuthStatus.error, error: message));
+
+  void _emitAuthenticated(AuthUserResult userResult) {
+    emit(
+      state.copyWith(
+        status: AuthStatus.authenticated,
+        user: User(
+          id: userResult.id,
+          email: userResult.email,
+          name: userResult.name,
+          phoneNumber: userResult.phoneNumber,
+        ),
+        clearError: true,
+        clearPendingEmail: true,
+        clearPendingUserId: true,
+      ),
+    );
+  }
+
+  void _emitUnauthenticated({
+    String? pendingUserId,
+    String? pendingEmail,
+    bool clearPendingUserId = false,
+    bool clearPendingEmail = false,
+  }) {
+    emit(
+      state.copyWith(
+        status: AuthStatus.unauthenticated,
+        pendingUserId: pendingUserId,
+        pendingEmail: pendingEmail,
+        clearError: true,
+        clearPendingUserId: clearPendingUserId,
+        clearPendingEmail: clearPendingEmail,
+      ),
+    );
   }
 }

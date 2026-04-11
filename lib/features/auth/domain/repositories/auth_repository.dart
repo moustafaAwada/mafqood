@@ -1,34 +1,40 @@
+import 'package:dartz/dartz.dart';
+import 'package:mafqood/core/error/failures.dart';
 import 'package:mafqood/features/auth/domain/entities/auth_results.dart';
 
 abstract class AuthRepository {
-  Future<RegisterResult> register({
+  Future<Either<Failure, RegisterResult>> register({
     required String name,
     required String email,
     required String phoneNumber,
     required String password,
   });
 
-  Future<String> resendConfirmationEmail({required String email});
+  Future<Either<Failure, String>> resendConfirmationEmail({
+    required String email,
+  });
 
-  Future<AuthUserResult> confirmEmail({
+  Future<Either<Failure, AuthUserResult>> confirmEmail({
     required String userId,
     required String code,
   });
 
-  Future<AuthUserResult> login({
+  Future<Either<Failure, AuthUserResult>> login({
     required String email,
     required String password,
   });
 
-  Future<ForgetPasswordResult> forgetPassword({required String email});
+  Future<Either<Failure, ForgetPasswordResult>> forgetPassword({
+    required String email,
+  });
 
-  Future<void> resetPassword({
+  Future<Either<Failure, Unit>> resetPassword({
     required String email,
     required String code,
     required String newPassword,
   });
 
-  Future<void> logout();
+  Future<Either<Failure, Unit>> logout();
 
   Future<bool> isLoggedIn();
 

@@ -1,8 +1,13 @@
-import 'package:mafqood/core/error/exceptions.dart';
+import 'package:mafqood/core/api/api_consumer.dart';
+import 'package:mafqood/core/api/end_points.dart';
 import 'package:mafqood/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:mafqood/features/auth/data/models/auth_models.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final ApiConsumer _api;
+
+  AuthRemoteDataSourceImpl({required ApiConsumer api}) : _api = api;
+
   @override
   Future<RegisterResponse> register({
     required String name,
@@ -10,14 +15,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String phoneNumber,
     required String password,
   }) async {
-    throw ServerException(
-      'Auth API not configured. Implement AuthRemoteDataSourceImpl with your backend.',
+    final request = RegisterRequest(
+      name: name,
+      email: email,
+      phoneNumber: phoneNumber,
+      password: password,
+      deviceId: '',
     );
+    final response = await _api.post(
+      EndPoints.register,
+      data: request.toJson(),
+    );
+    return RegisterResponse.fromJson(response);
   }
 
   @override
   Future<String> resendConfirmationEmail({required String email}) async {
-    throw ServerException('Auth API not configured.');
+    final request = ForgetPasswordRequest(email: email);
+    final response = await _api.post(
+      EndPoints.resendConfirmationEmail,
+      data: request.toJson(),
+    );
+    return response['userId'];
   }
 
   @override
@@ -25,7 +44,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String userId,
     required String code,
   }) async {
-    throw ServerException('Auth API not configured.');
+    final request = ConfirmEmailRequest(userId: userId, code: code);
+    final response = await _api.post(
+      EndPoints.confirmEmail,
+      data: request.toJson(),
+    );
+    return AuthResponse.fromJson(response);
   }
 
   @override
@@ -33,12 +57,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    throw ServerException('Auth API not configured.');
+    final request = LoginRequest(
+      email: email,
+      password: password,
+      deviceId: '',
+    );
+    final response = await _api.post(EndPoints.login, data: request.toJson());
+    return AuthResponse.fromJson(response);
   }
 
   @override
   Future<ForgetPasswordResponse> forgetPassword({required String email}) async {
-    throw ServerException('Auth API not configured.');
+    final request = ForgetPasswordRequest(email: email);
+    final response = await _api.post(
+      EndPoints.forgetPassword,
+      data: request.toJson(),
+    );
+    return ForgetPasswordResponse.fromJson(response);
   }
 
   @override
@@ -47,12 +82,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String code,
     required String newPassword,
   }) async {
-    throw ServerException('Auth API not configured.');
+    final request = ResetPasswordRequest(
+      email: email,
+      code: code,
+      newPassword: newPassword,
+    );
+    await _api.post(EndPoints.resetPassword, data: request.toJson());
   }
 
   @override
-  Future<void> logout() async {}
+  Future<void> logout() async {
+    // Implement if there's a logout endpoint
+  }
 
   @override
-  Future<void> revokeTokenIfNeeded() async {}
+  Future<void> revokeTokenIfNeeded() async {
+    // Implement if needed
+  }
 }
