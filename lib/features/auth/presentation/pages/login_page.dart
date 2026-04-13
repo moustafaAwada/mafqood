@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
-import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
+import 'package:mafqood/features/auth/presentation/pages/otp_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/signup_page.dart';
 import 'package:mafqood/features/main/presentation/main_shell_page.dart';
+
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/login';
@@ -36,9 +37,12 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (success) {
-      // CommonFunctions.showSuccessToast('  اهلاً ${authCubit.state.user.name} ');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MainShellPage()),
+        (route) => false,
+      );
     }
-    // Error is shown via BlocBuilder from state.error
   }
 
   @override
@@ -122,8 +126,9 @@ class _LoginPageState extends State<LoginPage> {
                             hidePassword: hidePassword,
                             onTogglePassword: () =>
                                 setState(() => hidePassword = !hidePassword),
-                            validator: (input) => (input ?? '').length < 3
-                                ? 'كلمة المرور قصيرة جداً'
+                            validator: (input) =>
+                                (input ?? '').length < 6
+                                ? 'كلمة المرور قصيرة جداً (6 أحرف على الأقل)'
                                 : null,
                             theme: theme,
                           ),
@@ -146,13 +151,60 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ],
                           ),
+                          // ── Error display ──
                           if (authState.error != null) ...[
                             SizedBox(height: 8),
-                            Text(
-                              authState.error!,
-                              style: TextStyle(
-                                color: Colors.red.shade700,
-                                fontSize: 14,
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colorScheme.error.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: colorScheme.error.withOpacity(0.3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    authState.error!,
+                                    style: TextStyle(
+                                      color: colorScheme.error,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  // If email not confirmed, show a quick verify link
+                                  if (authState is SignInFailure &&
+                                      (authState.error?.contains(
+                                              'EmailNotConfirmed') ==
+                                          true ||
+                                          authState.error?.contains(
+                                                  'لم يتم تأكيد') ==
+                                              true)) ...[
+                                    const SizedBox(height: 6),
+                                    GestureDetector(
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => OtpPage(
+                                            email:
+                                                _emailController.text.trim(),
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'انقر هنا لتأكيد بريدك الإلكتروني',
+                                        style: TextStyle(
+                                          color: colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          decoration:
+                                              TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           ],
@@ -173,16 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    // onPressed: _submit,
-                                    onPressed: () {
-                                      Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => MainShellPage(),
-                                        ),
-                                        (route) => false,
-                                      );
-                                    },
+                                    onPressed: _submit,
                                     child: Text(
                                       'تسجيل الدخول',
                                       style: TextStyle(
@@ -213,20 +256,22 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ],
                           ),
+                          // ── Verify email link ──
                           TextButton(
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ConfirmationEmailPage(
+                                builder: (_) => OtpPage(
                                   email: _emailController.text.trim(),
                                 ),
                               ),
                             ),
                             child: Text(
-                              'التحقق من البريد الإلكتروني!',
+                              'تأكيد البريد الإلكتروني',
                               style: TextStyle(
-                                color: theme.scaffoldBackgroundColor,
-                                fontSize: 12,
+                                color: colorScheme.onSurface.withOpacity(0.5),
+                                fontSize: 13,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ),

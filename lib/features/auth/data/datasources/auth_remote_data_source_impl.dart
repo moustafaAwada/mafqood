@@ -8,6 +8,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   AuthRemoteDataSourceImpl({required ApiConsumer api}) : _api = api;
 
+  Map<String, dynamic> _unwrapData(dynamic response) {
+    if (response is Map<String, dynamic>) {
+      final data = response['data'];
+      if (data is Map<String, dynamic>) {
+        return data;
+      }
+    }
+    return response as Map<String, dynamic>;
+  }
+
   @override
   Future<RegisterResponse> register({
     required String name,
@@ -20,13 +30,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       email: email,
       phoneNumber: phoneNumber,
       password: password,
-      deviceId: '',
     );
     final response = await _api.post(
       EndPoints.register,
       data: request.toJson(),
     );
-    return RegisterResponse.fromJson(response);
+    return RegisterResponse.fromJson(_unwrapData(response));
   }
 
   @override
@@ -36,7 +45,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       EndPoints.resendConfirmationEmail,
       data: request.toJson(),
     );
-    return response['userId'];
+    final data = _unwrapData(response);
+    return data['userId'] as String? ?? '';
   }
 
   @override
@@ -49,7 +59,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       EndPoints.confirmEmail,
       data: request.toJson(),
     );
-    return AuthResponse.fromJson(response);
+    return AuthResponse.fromJson(_unwrapData(response));
   }
 
   @override
@@ -60,10 +70,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final request = LoginRequest(
       email: email,
       password: password,
-      deviceId: '',
     );
     final response = await _api.post(EndPoints.login, data: request.toJson());
-    return AuthResponse.fromJson(response);
+    return AuthResponse.fromJson(_unwrapData(response));
   }
 
   @override
@@ -73,7 +82,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       EndPoints.forgetPassword,
       data: request.toJson(),
     );
-    return ForgetPasswordResponse.fromJson(response);
+    return ForgetPasswordResponse.fromJson(_unwrapData(response));
   }
 
   @override
@@ -91,12 +100,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> logout() async {
-    // Implement if there's a logout endpoint
+  Future<AuthResponse> refreshToken({
+    required String token,
+    required String refreshToken,
+  }) async {
+    final response = await _api.post(
+      EndPoints.refreshToken,
+      data: {'token': token, 'refreshToken': refreshToken},
+    );
+    return AuthResponse.fromJson(_unwrapData(response));
   }
 
   @override
-  Future<void> revokeTokenIfNeeded() async {
-    // Implement if needed
+  Future<void> revokeRefreshToken({
+    required String token,
+    required String refreshToken,
+  }) async {
+    await _api.post(
+      EndPoints.revokeRefreshToken,
+      data: {'token': token, 'refreshToken': refreshToken},
+    );
   }
 }

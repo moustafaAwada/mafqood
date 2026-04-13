@@ -3,14 +3,12 @@ class RegisterRequest {
   final String email;
   final String phoneNumber;
   final String password;
-  final String deviceId;
 
   RegisterRequest({
     required this.name,
     required this.email,
     required this.phoneNumber,
     required this.password,
-    required this.deviceId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -18,25 +16,21 @@ class RegisterRequest {
     'email': email,
     'phoneNumber': phoneNumber,
     'password': password,
-    'deviceId': deviceId,
   };
 }
 
 class LoginRequest {
   final String email;
   final String password;
-  final String deviceId;
 
   LoginRequest({
     required this.email,
     required this.password,
-    required this.deviceId,
   });
 
   Map<String, dynamic> toJson() => {
     'email': email,
     'password': password,
-    'deviceId': deviceId,
   };
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/domain/entities/user.dart';
 import 'package:mafqood/features/auth/domain/repositories/auth_repository.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
+import 'package:mafqood/core/services/location_sync_service.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
@@ -20,6 +21,7 @@ class AuthCubit extends Cubit<AuthState> {
         final userData = await _authRepository.getStoredUserData();
         if (userData != null) {
           emit(AuthAuthenticated(User.fromJson(userData)));
+          LocationSyncService.startLocationSync();
           return;
         }
       }
@@ -75,15 +77,16 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<bool> confirmEmail({required String code}) async {
-    if (state.pendingUserId == null) {
+    final pendingUserId = state.pendingUserId;
+    if (pendingUserId == null) {
       emit(const ConfirmEmailFailure('لا يوجد مستخدم في انتظار التأكيد'));
       return false;
     }
 
-    emit(const ConfirmEmailLoading());
+    emit(ConfirmEmailLoading(pendingUserId: pendingUserId));
 
     final result = await _authRepository.confirmEmail(
-      userId: state.pendingUserId!,
+      userId: pendingUserId,
       code: code,
     );
 
@@ -103,6 +106,7 @@ class AuthCubit extends Cubit<AuthState> {
             ),
           ),
         );
+        LocationSyncService.startLocationSync();
         return true;
       },
     );
@@ -110,7 +114,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<bool> login({required String email, required String password}) async {
     emit(const SignInLoading());
-
     final result = await _authRepository.login(
       email: email,
       password: password,
@@ -132,6 +135,7 @@ class AuthCubit extends Cubit<AuthState> {
             ),
           ),
         );
+        LocationSyncService.startLocationSync();
         return true;
       },
     );
@@ -158,7 +162,8 @@ class AuthCubit extends Cubit<AuthState> {
     required String code,
     required String newPassword,
   }) async {
-    if (state.pendingEmail == null) {
+    final pendingEmail = state.pendingEmail;
+    if (pendingEmail == null) {
       emit(
         const ResetPasswordFailure(
           'لا يوجد بريد إلكتروني في انتظار إعادة التعيين',
@@ -167,10 +172,10 @@ class AuthCubit extends Cubit<AuthState> {
       return false;
     }
 
-    emit(const ResetPasswordLoading());
+    emit(ResetPasswordLoading(pendingEmail: pendingEmail));
 
     final result = await _authRepository.resetPassword(
-      email: state.pendingEmail!,
+      email: pendingEmail,
       code: code,
       newPassword: newPassword,
     );
@@ -197,6 +202,7 @@ class AuthCubit extends Cubit<AuthState> {
     );
     try {
       await _authRepository.logout();
+      LocationSyncService.stopLocationSync();
       emit(const LogoutSuccess());
     } catch (e) {
       emit(LogoutFailure(e.toString()));

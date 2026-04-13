@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
-import 'package:mafqood/features/auth/presentation/pages/confirmation_email_page.dart';
+import 'package:mafqood/features/auth/presentation/pages/otp_page.dart';
 
 class SignUpPage extends StatefulWidget {
   static const routeName = '/signup';
@@ -19,16 +19,19 @@ class _SignUpPageState extends State<SignUpPage> {
   final Color primaryColor = Colors.lightBlue;
 
   final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  // Validators matching backend rules
+  static final _phoneRegex = RegExp(r'^(010|011|012|015)\d{8}$');
+  static final _passwordRegex =
+      RegExp(r'(?=.*[0-9])(?=.*[!@#$%^&*()\[\]{}\-_+=~`|:;<>,./?]).{6,}');
+
   @override
   void dispose() {
     _firstNameController.dispose();
-    _lastNameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -47,8 +50,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     final success = await authCubit.register(
-      name:
-          '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+      name: _firstNameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
       phoneNumber: _phoneController.text.trim(),
@@ -58,7 +60,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (success) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => ConfirmationEmailPage()),
+        MaterialPageRoute(
+          builder: (context) =>
+              OtpPage(email: _emailController.text.trim()),
+        ),
       );
     }
   }
@@ -103,9 +108,27 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return BlocBuilder<AuthCubit, AuthState>(
-      buildWhen: (prev, curr) =>
-          prev.isLoading != curr.isLoading || prev.error != curr.error,
+    return BlocConsumer<AuthCubit, AuthState>(
+      listenWhen: (prev, curr) =>
+          prev.error != curr.error && curr.error != null,
+      listener: (context, state) {
+        if (state.error != null) {
+          showDialog<void>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('خطأ'),
+              content: Text(state.error!),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('موافق'),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      buildWhen: (prev, curr) => prev.isLoading != curr.isLoading,
       builder: (context, authState) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -215,8 +238,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ),
                                   ),
                                 ),
-                            validator: (v) =>
-                                (v ?? '').isEmpty ? 'رقم الهاتف مطلوب' : null,
+                            validator: (v) => !_phoneRegex.hasMatch(v ?? '')
+                                ? 'رقم غير صالح (11 رقم، يبدأ بـ 010/011/012/015)'
+                                : null,
                           ),
                           SizedBox(height: 12),
                           TextFormField(
@@ -241,9 +265,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ),
                                   ),
                                 ),
-                            validator: (v) => (v ?? '').length < 6
-                                ? 'كلمة المرور قصيرة جداً'
-                                : null,
+                            validator: (v) {
+                              if ((v ?? '').length < 6) {
+                                return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                              }
+                              if (!_passwordRegex.hasMatch(v ?? '')) {
+                                return 'يجب أن تحتوي على رقم ورمز خاص (!@#...)';
+                              }
+                              return null;
+                            },
                           ),
                           SizedBox(height: 12),
                           TextFormField(
@@ -259,16 +289,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ? 'كلمتا المرور غير متطابقتين'
                                 : null,
                           ),
-                          if (authState.error != null) ...[
-                            SizedBox(height: 8),
-                            Text(
-                              authState.error!,
-                              style: TextStyle(
-                                color: Colors.red.shade700,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
                           SizedBox(height: 24),
                           authState.isLoading
                               ? CircularProgressIndicator(

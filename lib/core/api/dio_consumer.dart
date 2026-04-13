@@ -6,7 +6,7 @@ import 'package:mafqood/core/error/exceptions.dart';
 class DioConsumer extends ApiConsumer {
   final Dio dio;
 
-  DioConsumer({required this.dio}) {
+  DioConsumer({required this.dio, List<Interceptor>? interceptors}) {
     dio.options.baseUrl = EndPoints.baseUrl;
 
     dio.interceptors.add(
@@ -20,6 +20,10 @@ class DioConsumer extends ApiConsumer {
         error: true,
       ),
     );
+
+    if (interceptors != null) {
+      dio.interceptors.addAll(interceptors);
+    }
   }
 
   @override
@@ -44,6 +48,25 @@ class DioConsumer extends ApiConsumer {
   }) async {
     try {
       final response = await dio.post(
+        path,
+        data: isFormData ? FormData.fromMap(data) : data,
+        queryParameters: queryParameters,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      handleDioException(e);
+    }
+  }
+
+  @override
+  Future<dynamic> put(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    bool isFormData = false,
+  }) async {
+    try {
+      final response = await dio.put(
         path,
         data: isFormData ? FormData.fromMap(data) : data,
         queryParameters: queryParameters,

@@ -1,23 +1,32 @@
+import 'package:mafqood/core/database/auth_storage.dart';
 import 'package:mafqood/features/auth/data/datasources/auth_local_data_source.dart';
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
-  final Map<String, dynamic> _userData = {};
-  bool _hasValidSession = false;
+  final AuthStorage _authStorage;
+
+  AuthLocalDataSourceImpl({AuthStorage? authStorage})
+    : _authStorage = authStorage ?? AuthStorage();
 
   @override
-  Future<bool> isLoggedIn() async => _hasValidSession;
+  Future<bool> isLoggedIn() async => _authStorage.hasValidSession();
 
   @override
-  Future<Map<String, dynamic>?> getStoredUserData() async {
-    if (_userData.isEmpty) return null;
-    return Map<String, dynamic>.from(_userData);
-  }
+  Future<Map<String, dynamic>?> getStoredUserData() async =>
+      _authStorage.getUserData();
+
+  @override
+  Future<String?> getAccessToken() async => _authStorage.getToken();
+
+  @override
+  Future<String?> getRefreshToken() async => _authStorage.getRefreshToken();
+
+  @override
+  Future<DateTime?> getRefreshTokenExpiration() async =>
+      _authStorage.getRefreshTokenExpiration();
 
   @override
   Future<void> saveUserData(Map<String, dynamic> data) async {
-    _userData.clear();
-    _userData.addAll(data);
-    _hasValidSession = true;
+    await _authStorage.saveUserData(data);
   }
 
   @override
@@ -27,12 +36,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     required int expiresIn,
     required DateTime refreshTokenExpiration,
   }) async {
-    _hasValidSession = true;
+    await _authStorage.saveAuthResponse(
+      token: accessToken,
+      refreshToken: refreshToken,
+      expiresIn: expiresIn,
+      refreshTokenExpiration: refreshTokenExpiration,
+    );
   }
 
   @override
   Future<void> clearAll() async {
-    _userData.clear();
-    _hasValidSession = false;
+    await _authStorage.clear();
   }
 }

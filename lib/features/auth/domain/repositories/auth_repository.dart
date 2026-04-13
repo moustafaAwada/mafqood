@@ -34,9 +34,23 @@ abstract class AuthRepository {
     required String newPassword,
   });
 
+  Future<Either<Failure, AuthUserResult>> refreshToken({
+    required String token,
+    required String refreshToken,
+  });
+
+  Future<Either<Failure, Unit>> revokeRefreshToken({
+    required String token,
+    required String refreshToken,
+  });
+
   Future<Either<Failure, Unit>> logout();
 
   Future<bool> isLoggedIn();
 
   Future<Map<String, dynamic>?> getStoredUserData();
+
+  Future<String?> getAccessToken();
+
+  Future<String?> getRefreshToken();
 }

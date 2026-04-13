@@ -32,22 +32,18 @@ ErrorModel _parseErrorModel(dynamic data, int? statusCode, String? message) {
 void handleDioException(DioException e) {
   final statusCode = e.response?.statusCode;
   final data = e.response?.data;
-  final message = e.message;
+  final message = e.response?.statusMessage ?? e.message;
 
-  switch (e.type) {
-    case DioExceptionType.connectionTimeout:
-    case DioExceptionType.sendTimeout:
-    case DioExceptionType.receiveTimeout:
-    case DioExceptionType.badCertificate:
-    case DioExceptionType.cancel:
-    case DioExceptionType.connectionError:
-    case DioExceptionType.unknown:
-      throw ServerException(
-        errorModel: _parseErrorModel(data, statusCode, message),
-      );
-    case DioExceptionType.badResponse:
-      throw ServerException(
-        errorModel: _parseErrorModel(data, statusCode, message),
-      );
+  if (e.type == DioExceptionType.badResponse ||
+      e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.sendTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.badCertificate ||
+      e.type == DioExceptionType.cancel ||
+      e.type == DioExceptionType.connectionError ||
+      e.type == DioExceptionType.unknown) {
+    throw ServerException(
+      errorModel: _parseErrorModel(data, statusCode, message),
+    );
   }
 }

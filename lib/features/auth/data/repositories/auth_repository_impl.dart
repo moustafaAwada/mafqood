@@ -93,7 +93,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final response = await _remote.login(email: email, password: password);
+      final response = await _remote.login(
+        email: email,
+        password: password,
+      );
       await _local.saveTokens(
         accessToken: response.token,
         refreshToken: response.refreshToken,
@@ -149,9 +152,64 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, AuthUserResult>> refreshToken({
+    required String token,
+    required String refreshToken,
+  }) async {
+    try {
+      final response = await _remote.refreshToken(
+        token: token,
+        refreshToken: refreshToken,
+      );
+      await _local.saveTokens(
+        accessToken: response.token,
+        refreshToken: response.refreshToken,
+        expiresIn: response.expiresIn,
+        refreshTokenExpiration: response.refreshTokenExpiration,
+      );
+      await _local.saveUserData({
+        'id': response.id,
+        'email': response.email,
+        'name': response.name,
+        'phoneNumber': response.phoneNumber,
+      });
+      return Right(_authResponseToResult(response));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.errorModel.errorMessage));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> revokeRefreshToken({
+    required String token,
+    required String refreshToken,
+  }) async {
+    try {
+      await _remote.revokeRefreshToken(
+        token: token,
+        refreshToken: refreshToken,
+      );
+      return const Right(unit);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.errorModel.errorMessage));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> logout() async {
     try {
-      await _remote.revokeTokenIfNeeded();
+      final token = await _local.getAccessToken();
+      final refreshToken = await _local.getRefreshToken();
+      if (token != null && refreshToken != null) {
+        await _remote.revokeRefreshToken(
+          token: token,
+          refreshToken: refreshToken,
+        );
+      }
       await _local.clearAll();
       return const Right(unit);
     } on ServerException catch (e) {
@@ -167,4 +225,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Map<String, dynamic>?> getStoredUserData() async =>
       _local.getStoredUserData();
+
+  @override
+  Future<String?> getAccessToken() async => _local.getAccessToken();
+
+  @override
+  Future<String?> getRefreshToken() async => _local.getRefreshToken();
 }

@@ -15,7 +15,10 @@ abstract class AuthRemoteDataSource {
     required String code,
   });
 
-  Future<AuthResponse> login({required String email, required String password});
+  Future<AuthResponse> login({
+    required String email,
+    required String password,
+  });
 
   Future<ForgetPasswordResponse> forgetPassword({required String email});
 
@@ -25,7 +28,13 @@ abstract class AuthRemoteDataSource {
     required String newPassword,
   });
 
-  Future<void> logout();
+  Future<AuthResponse> refreshToken({
+    required String token,
+    required String refreshToken,
+  });
 
-  Future<void> revokeTokenIfNeeded();
+  Future<void> revokeRefreshToken({
+    required String token,
+    required String refreshToken,
+  });
 }

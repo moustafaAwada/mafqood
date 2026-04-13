@@ -24,32 +24,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   ) {
     return InputDecoration(
       filled: true,
-      // fillColor: kBackgroundColor,
       hintText: hint,
       hintStyle: TextStyle(
         color: colorScheme.onSurface.withOpacity(0.6),
         fontSize: 14,
       ),
-      prefixIcon: Icon(
-        iconData,
-        // color: kTextLowBlackColor
-      ),
+      prefixIcon: Icon(iconData, color: colorScheme.primary),
       contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
+        borderSide: BorderSide(color: theme.dividerColor, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
+        borderSide: BorderSide(color: theme.dividerColor, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: theme.scaffoldBackgroundColor, width: 2),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Color(0xFFF65054), width: 2),
+        borderSide: BorderSide(color: Color(0xFFF65054), width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -102,10 +98,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: size.height * 0.04),
-                    Image.asset(
-                      'assets/images/forgetPassword.png',
-                      height: size.height * 0.26,
-                      fit: BoxFit.contain,
+                    Center(
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.lock_reset_outlined,
+                          size: 56,
+                          color: colorScheme.primary,
+                        ),
+                      ),
                     ),
                     SizedBox(height: size.height * 0.05),
                     Text(

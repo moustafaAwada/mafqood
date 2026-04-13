@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/account/presentation/pages/donation_page.dart';
 import 'package:mafqood/features/account/presentation/pages/edit_profile_page.dart';
 import 'package:mafqood/features/account/presentation/pages/family_care_page.dart';
 import 'package:mafqood/features/account/presentation/pages/my_posts_page.dart';
 import 'package:mafqood/features/account/presentation/pages/saved_posts_page.dart';
 import 'package:mafqood/features/account/presentation/pages/settings_page.dart';
+import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
 import 'package:mafqood/features/account/presentation/widgets/account_item.dart';
 import 'package:mafqood/features/account/presentation/widgets/logout_button.dart';
 import 'package:mafqood/features/account/presentation/widgets/profile_card.dart';
@@ -105,7 +108,16 @@ class AccountPage extends StatelessWidget {
             const SizedBox(height: 32),
 
             // ── Logout ──
-            LogoutButton(onPressed: () {}),
+            LogoutButton(
+              onPressed: () async {
+                await context.read<AuthCubit>().logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  LoginPage.routeName,
+                  (route) => false,
+                );
+              },
+            ),
             const SizedBox(height: 24),
           ],
         ),
