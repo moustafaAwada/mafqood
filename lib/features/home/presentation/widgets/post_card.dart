@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:mafqood/features/home/presentation/widgets/comments_bottom_sheet.dart';
 import 'package:mafqood/features/home/presentation/widgets/post_action.dart';
+import 'package:mafqood/features/posts/domain/entities/post_entities.dart';
 
 class PostCard extends StatefulWidget {
+  final int postId;
   final String statusLabel;
   final Color statusColor;
   final String name;
   final String subtitle;
+  final int initialLikes;
+  final int initialDislikes;
+  final int initialComments;
+  final bool initialIsSaved;
+  final ReactType? initialReactType;
+  final ValueChanged<ReactType>? onReact;
+  final ValueChanged<bool>? onToggleSave;
 
   const PostCard({
     super.key,
+    required this.postId,
     required this.statusLabel,
     required this.statusColor,
     required this.name,
     required this.subtitle,
+    this.initialLikes = 0,
+    this.initialDislikes = 0,
+    this.initialComments = 0,
+    this.initialIsSaved = false,
+    this.initialReactType,
+    this.onReact,
+    this.onToggleSave,
   });
 
   @override
@@ -35,9 +52,12 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _likes = 0;
-    _dislikes = 0;
-    _comments = 0;
+    _likes = widget.initialLikes;
+    _dislikes = widget.initialDislikes;
+    _comments = widget.initialComments;
+    _isLiked = widget.initialReactType == ReactType.like;
+    _isDisliked = widget.initialReactType == ReactType.dislike;
+    _isSaved = widget.initialIsSaved;
 
     _elevationController = AnimationController(
       duration: const Duration(milliseconds: 150),
@@ -67,39 +87,32 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   }
 
   void _toggleLike() {
-    setState(() {
-      if (_isLiked) {
-        _isLiked = false;
-        _likes--;
-      } else {
-        _isLiked = true;
-        _likes++;
-        if (_isDisliked) {
-          _isDisliked = false;
-          _dislikes--;
-        }
-      }
-    });
+    widget.onReact?.call(ReactType.like);
   }
 
   void _toggleDislike() {
-    setState(() {
-      if (_isDisliked) {
-        _isDisliked = false;
-        _dislikes--;
-      } else {
-        _isDisliked = true;
-        _dislikes++;
-        if (_isLiked) {
-          _isLiked = false;
-          _likes--;
-        }
-      }
-    });
+    widget.onReact?.call(ReactType.dislike);
   }
 
   void _toggleSave() {
-    setState(() => _isSaved = !_isSaved);
+    widget.onToggleSave?.call(_isSaved);
+  }
+
+  @override
+  void didUpdateWidget(covariant PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialLikes != widget.initialLikes ||
+        oldWidget.initialDislikes != widget.initialDislikes ||
+        oldWidget.initialComments != widget.initialComments ||
+        oldWidget.initialIsSaved != widget.initialIsSaved ||
+        oldWidget.initialReactType != widget.initialReactType) {
+      _likes = widget.initialLikes;
+      _dislikes = widget.initialDislikes;
+      _comments = widget.initialComments;
+      _isSaved = widget.initialIsSaved;
+      _isLiked = widget.initialReactType == ReactType.like;
+      _isDisliked = widget.initialReactType == ReactType.dislike;
+    }
   }
 
   @override

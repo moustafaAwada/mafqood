@@ -25,6 +25,10 @@ import 'package:mafqood/features/account/data/datasources/account_remote_data_so
 import 'package:mafqood/features/account/data/repositories/account_repository_impl.dart';
 import 'package:mafqood/features/account/domain/repositories/account_repository.dart';
 import 'package:mafqood/features/account/presentation/cubit/account_cubit.dart';
+import 'package:mafqood/features/posts/data/datasources/post_remote_data_source_impl.dart';
+import 'package:mafqood/features/posts/data/repositories/post_repository_impl.dart';
+import 'package:mafqood/features/posts/domain/repositories/post_repository.dart';
+import 'package:mafqood/features/posts/presentation/cubit/post_feed_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +73,19 @@ class MafqoodApp extends StatelessWidget {
             );
           },
         ),
+        RepositoryProvider<PostRepository>(
+          create: (_) {
+            final authStorage = getIt<AuthStorage>();
+            final dio = Dio();
+            final apiConsumer = DioConsumer(
+              dio: dio,
+              interceptors: [AuthInterceptor(dio: dio, authStorage: authStorage)],
+            );
+            return PostRepositoryImpl(
+              remote: PostRemoteDataSourceImpl(api: apiConsumer),
+            );
+          },
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -79,6 +96,10 @@ class MafqoodApp extends StatelessWidget {
           BlocProvider<AccountCubit>(
             create: (context) => AccountCubit(
                 accountRepository: context.read<AccountRepository>()),
+          ),
+          BlocProvider<PostFeedCubit>(
+            create: (context) =>
+                PostFeedCubit(postRepository: context.read<PostRepository>()),
           ),
           BlocProvider<ThemeCubit>(create: (context) => ThemeCubit()),
         ],
