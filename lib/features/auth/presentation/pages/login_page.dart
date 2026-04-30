@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/core/database/auth_storage.dart';
+import 'package:mafqood/core/services/service_locator.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/otp_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:mafqood/features/auth/presentation/pages/signup_page.dart';
+import 'package:mafqood/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:mafqood/features/main/presentation/main_shell_page.dart';
+import 'package:mafqood/features/posts/data/services/post_interaction_hub_service.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -37,6 +41,13 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (success) {
+      // Connect SignalR hubs with the fresh JWT
+      final token = await getIt<AuthStorage>().getToken();
+      if (token != null && mounted) {
+        context.read<ChatCubit>().connectHub(token);
+        getIt<PostInteractionHubService>().connect(token);
+      }
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => MainShellPage()),

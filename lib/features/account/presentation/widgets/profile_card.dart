@@ -1,8 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mafqood/core/database/auth_storage.dart';
+import 'package:mafqood/core/services/service_locator.dart';
 import 'package:mafqood/features/account/presentation/pages/edit_profile_page.dart';
 
-class ProfileCard extends StatelessWidget {
+class ProfileCard extends StatefulWidget {
   const ProfileCard({super.key});
+
+  @override
+  State<ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends State<ProfileCard> {
+  String _name = '';
+  String _email = '';
+  String? _profilePictureUrl;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await getIt<AuthStorage>().getUserData();
+    if (mounted) {
+      setState(() {
+        _name = userData?['name'] ?? '${userData?['firstName'] ?? ''} ${userData?['lastName'] ?? ''}'.trim();
+        _email = userData?['email'] ?? '';
+        _profilePictureUrl = userData?['profilePictureUrl'];
+        _isLoading = false;
+      });
+    }
+  }
+
+  String get _initials {
+    if (_name.isEmpty) return '?';
+    final parts = _name.split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +53,7 @@ class ProfileCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const EditProfilePage()),
-        );
+        ).then((_) => _loadUserData()); // Refresh data when returning
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -35,13 +74,19 @@ class ProfileCard extends StatelessWidget {
             CircleAvatar(
               radius: 35,
               backgroundColor: colorScheme.primaryContainer,
-              child: Text(
-                'MA',
-                style: TextStyle(
-                  color: colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              backgroundImage: _profilePictureUrl != null && _profilePictureUrl!.isNotEmpty
+                  ? CachedNetworkImageProvider(_profilePictureUrl!)
+                  : null,
+              child: _profilePictureUrl == null || _profilePictureUrl!.isEmpty
+                  ? Text(
+                      _initials,
+                      style: TextStyle(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -49,7 +94,7 @@ class ProfileCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mustafa Alfy',
+                    _isLoading ? 'جاري التحميل...' : (_name.isNotEmpty ? _name : 'مستخدم'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -58,7 +103,7 @@ class ProfileCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'mustafaalfy@gmail.com',
+                    _email.isNotEmpty ? _email : '',
                     style: TextStyle(
                       fontSize: 14,
                       color: colorScheme.onSurface.withOpacity(0.6),

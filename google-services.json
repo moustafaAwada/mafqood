@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "695763216125",
+    "project_id": "mafqood-f08b3",
+    "storage_bucket": "mafqood-f08b3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695763216125:android:15724f0884943dfbea8094",
+        "android_client_info": {
+          "package_name": "com.example.mafqood"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYhaNCW0nbh96y_sArkzJE8AHN6yiF-CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

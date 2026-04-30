@@ -1,4 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mafqood/core/database/auth_storage.dart';
+import 'package:mafqood/core/services/service_locator.dart';
+import 'package:mafqood/features/account/domain/usecases/update_user_profile_use_case.dart';
+import 'package:mafqood/features/account/presentation/cubit/account_cubit.dart';
+import 'package:mafqood/features/account/presentation/cubit/account_state.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -12,6 +21,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+  File? _selectedImage;
+  String? _profilePictureUrl;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await getIt<AuthStorage>().getUserData();
+    if (userData != null && mounted) {
+      setState(() {
+        _firstNameController.text = userData['firstName'] ?? '';
+        _lastNameController.text = userData['lastName'] ?? '';
+        _emailController.text = userData['email'] ?? '';
+        _phoneController.text = userData['phoneNumber'] ?? '';
+        _profilePictureUrl = userData['profilePictureUrl'];
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -22,17 +53,61 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void _save() {
-    // TODO: Implement save profile logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('تم حفظ التغييرات بنجاح', style: TextStyle(fontFamily: 'Cairo')),
-        backgroundColor: const Color(0xFF4CAF50),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'اختر مصدر الصورة',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('الكاميرا', style: TextStyle(fontFamily: 'Cairo')),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('المعرض', style: TextStyle(fontFamily: 'Cairo')),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
       ),
     );
-    Navigator.pop(context);
+  }
+
+  void _save() {
+    final params = UpdateProfileParams(
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      profileImage: _selectedImage,
+    );
+    context.read<AccountCubit>().updateProfile(params);
   }
 
   @override
@@ -42,8 +117,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
     
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
+      child: BlocConsumer<AccountCubit, AccountState>(
+        listener: (context, state) {
+          if (state is UpdateProfileSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('تم حفظ التغييرات بنجاح', style: TextStyle(fontFamily: 'Cairo')),
+                backgroundColor: const Color(0xFF4CAF50),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            );
+            Navigator.pop(context);
+          } else if (state is UpdateProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error, style: const TextStyle(fontFamily: 'Cairo')),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is UpdateProfileLoading;
+          return Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: colorScheme.primary,
           elevation: 0,
@@ -84,21 +184,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             child: CircleAvatar(
                               radius: 60,
                               backgroundColor: colorScheme.primaryContainer,
-                              child: Text(
-                                'MA',
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                              ),
+                              backgroundImage: _selectedImage != null
+                                  ? FileImage(_selectedImage!)
+                                  : (_profilePictureUrl != null && _profilePictureUrl!.isNotEmpty
+                                      ? CachedNetworkImageProvider(_profilePictureUrl!) as ImageProvider
+                                      : null),
+                              child: (_selectedImage == null && (_profilePictureUrl == null || _profilePictureUrl!.isEmpty))
+                                  ? Text(
+                                      _firstNameController.text.isNotEmpty ? _firstNameController.text[0].toUpperCase() : 'MA',
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onPrimaryContainer,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
                           Positioned(
                             bottom: 0,
                             right: 0,
                             child: GestureDetector(
-                              onTap: () {},
+                              onTap: _showImageSourceDialog,
                               child: Container(
                                 width: 40,
                                 height: 40,
@@ -180,7 +287,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: _save,
+                  onPressed: isLoading ? null : _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     foregroundColor: colorScheme.onPrimary,
@@ -189,19 +296,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'حفظ التغييرات',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                  child: isLoading
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: colorScheme.onPrimary,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'حفظ التغييرات',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                 ),
               ),
             ),
           ],
         ),
+          );
+        },
       ),
     );
   }

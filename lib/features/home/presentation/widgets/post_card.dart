@@ -1,64 +1,29 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:mafqood/features/home/presentation/widgets/comments_bottom_sheet.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mafqood/features/home/presentation/widgets/post_action.dart';
+import 'package:mafqood/features/home/presentation/widgets/post_menu_widget.dart';
 import 'package:mafqood/features/posts/domain/entities/post_entities.dart';
+import 'package:mafqood/features/posts/presentation/cubit/post_feed_cubit.dart';
 
 class PostCard extends StatefulWidget {
-  final int postId;
-  final String statusLabel;
-  final Color statusColor;
-  final String name;
-  final String subtitle;
-  final int initialLikes;
-  final int initialDislikes;
-  final int initialComments;
-  final bool initialIsSaved;
-  final ReactType? initialReactType;
-  final ValueChanged<ReactType>? onReact;
-  final ValueChanged<bool>? onToggleSave;
+  final PostItem post;
 
-  const PostCard({
-    super.key,
-    required this.postId,
-    required this.statusLabel,
-    required this.statusColor,
-    required this.name,
-    required this.subtitle,
-    this.initialLikes = 0,
-    this.initialDislikes = 0,
-    this.initialComments = 0,
-    this.initialIsSaved = false,
-    this.initialReactType,
-    this.onReact,
-    this.onToggleSave,
-  });
+  const PostCard({super.key, required this.post});
 
   @override
   State<PostCard> createState() => _PostCardState();
 }
 
 class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
-  late int _likes;
-  late int _dislikes;
-  late int _comments;
-  bool _isLiked = false;
-  bool _isDisliked = false;
-  bool _isSaved = false;
-  final List<Comment> _commentsList = [];
-
   late AnimationController _elevationController;
   late Animation<double> _elevationAnimation;
+
+  PostItem get post => widget.post;
 
   @override
   void initState() {
     super.initState();
-    _likes = widget.initialLikes;
-    _dislikes = widget.initialDislikes;
-    _comments = widget.initialComments;
-    _isLiked = widget.initialReactType == ReactType.like;
-    _isDisliked = widget.initialReactType == ReactType.dislike;
-    _isSaved = widget.initialIsSaved;
-
     _elevationController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
@@ -74,53 +39,29 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _openComments() async {
-    final result = await showCommentsBottomSheet(
-      context,
-      comments: _commentsList,
-    );
-    if (result != null) {
-      setState(() {
-        _comments = result;
-      });
-    }
+  void _openPostDetails() {
+    Navigator.pushNamed(context, '/post-details', arguments: post.id);
   }
 
-  void _toggleLike() {
-    widget.onReact?.call(ReactType.like);
-  }
-
-  void _toggleDislike() {
-    widget.onReact?.call(ReactType.dislike);
-  }
-
-  void _toggleSave() {
-    widget.onToggleSave?.call(_isSaved);
-  }
-
-  @override
-  void didUpdateWidget(covariant PostCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialLikes != widget.initialLikes ||
-        oldWidget.initialDislikes != widget.initialDislikes ||
-        oldWidget.initialComments != widget.initialComments ||
-        oldWidget.initialIsSaved != widget.initialIsSaved ||
-        oldWidget.initialReactType != widget.initialReactType) {
-      _likes = widget.initialLikes;
-      _dislikes = widget.initialDislikes;
-      _comments = widget.initialComments;
-      _isSaved = widget.initialIsSaved;
-      _isLiked = widget.initialReactType == ReactType.like;
-      _isDisliked = widget.initialReactType == ReactType.dislike;
-    }
+  void _navigateToProfile() {
+    Navigator.pushNamed(context, '/user-profile', arguments: post.userId);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final cubit = context.read<PostFeedCubit>();
+
+    final isLiked = post.userReactType == ReactType.like;
+    final isDisliked = post.userReactType == ReactType.dislike;
+    final statusLabel = post.type == PostType.lost ? 'مفقود' : 'موجود';
+    final statusColor = post.type == PostType.lost
+        ? const Color(0xFFFF5252)
+        : const Color(0xFF4CAF50);
 
     return GestureDetector(
+      onTap: _openPostDetails,
       onTapDown: (_) => _elevationController.forward(),
       onTapUp: (_) => _elevationController.reverse(),
       onTapCancel: () => _elevationController.reverse(),
@@ -142,113 +83,135 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // ── Header: Avatar + Name + Status + Menu ──
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(4, 12, 12, 12),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: colorScheme.primaryContainer,
-                      child: Text(
-                        widget.name[0],
-                        style: TextStyle(
-                          color: colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    GestureDetector(
+                      onTap: _navigateToProfile,
+                      child: post.userProfilePictureUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: post.userProfilePictureUrl!,
+                              imageBuilder: (_, imageProvider) => CircleAvatar(
+                                radius: 20,
+                                backgroundImage: imageProvider,
+                              ),
+                              placeholder: (_, __) => CircleAvatar(
+                                radius: 20,
+                                backgroundColor: colorScheme.primaryContainer,
+                                child: const SizedBox(
+                                  width: 16, height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => CircleAvatar(
+                                radius: 20,
+                                backgroundColor: colorScheme.primaryContainer,
+                                child: Text(
+                                  (post.userName ?? '?')[0],
+                                  style: TextStyle(
+                                    color: colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : CircleAvatar(
+                              radius: 20,
+                              backgroundColor: colorScheme.primaryContainer,
+                              child: Text(
+                                (post.userName ?? '?')[0],
+                                style: TextStyle(
+                                  color: colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                              fontSize: 15,
+                      child: GestureDetector(
+                        onTap: _navigateToProfile,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post.userName ?? 'مستخدم',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                                fontSize: 15,
+                              ),
                             ),
-                          ),
-                          Text(
-                            widget.subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorScheme.onSurface.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
+                            if (post.description != null &&
+                                post.description!.isNotEmpty)
+                              Text(
+                                post.description!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: colorScheme.onSurface.withOpacity(0.5),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: widget.statusColor.withOpacity(0.1),
+                        color: statusColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: widget.statusColor.withOpacity(0.2),
-                        ),
+                        border:
+                            Border.all(color: statusColor.withOpacity(0.2)),
                       ),
                       child: Text(
-                        widget.statusLabel,
+                        statusLabel,
                         style: TextStyle(
-                          color: widget.statusColor,
+                          color: statusColor,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
+                    PostMenuWidget(post: post),
                   ],
                 ),
               ),
 
-              // Image placeholder with shimmer effect
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              colorScheme.surfaceContainerHighest.withOpacity(
-                                0.3,
-                              ),
-                              colorScheme.surfaceContainerHighest.withOpacity(
-                                0.6,
-                              ),
-                              colorScheme.surfaceContainerHighest.withOpacity(
-                                0.3,
-                              ),
-                            ],
-                            stops: const [0.0, 0.5, 1.0],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
+              if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: post.imageUrl!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 200,
+                      placeholder: (_, __) => Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.primary,
                         ),
                       ),
-                    ),
-                    const Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 50,
-                        color: Colors.white70,
+                      errorWidget: (_, __, ___) => Center(
+                        child: Icon(Icons.broken_image_outlined,
+                            size: 50, color: colorScheme.onSurface.withOpacity(0.3)),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
 
+              // ── Action bar ──
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
@@ -257,43 +220,53 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     Row(
                       children: [
                         PostAction(
-                          icon: _isLiked
+                          icon: isLiked
                               ? Icons.thumb_up
                               : Icons.thumb_up_alt_outlined,
-                          count: _likes,
-                          isActive: _isLiked,
+                          count: post.likesCount,
+                          isActive: isLiked,
                           activeColor: colorScheme.primary,
-                          onTap: _toggleLike,
+                          onTap: () => cubit.toggleReact(
+                            postId: post.id,
+                            reactType: ReactType.like,
+                          ),
                         ),
                         const SizedBox(width: 20),
                         PostAction(
-                          icon: _isDisliked
+                          icon: isDisliked
                               ? Icons.thumb_down
                               : Icons.thumb_down_alt_outlined,
-                          count: _dislikes,
-                          isActive: _isDisliked,
+                          count: post.dislikesCount,
+                          isActive: isDisliked,
                           activeColor: const Color(0xFFFF5252),
-                          onTap: _toggleDislike,
+                          onTap: () => cubit.toggleReact(
+                            postId: post.id,
+                            reactType: ReactType.dislike,
+                          ),
                         ),
                         const SizedBox(width: 20),
                         PostAction(
                           icon: Icons.chat_bubble_outline,
-                          count: _comments,
+                          count: post.commentsCount,
                           isActive: false,
-                          activeColor: colorScheme.onSurface.withOpacity(0.7),
-                          onTap: _openComments,
+                          activeColor:
+                              colorScheme.onSurface.withOpacity(0.7),
+                          onTap: _openPostDetails,
                         ),
                         const SizedBox(width: 20),
                         GestureDetector(
-                          onTap: _toggleSave,
+                          onTap: () => cubit.toggleSave(
+                            postId: post.id,
+                            isSaved: post.isSaved,
+                          ),
                           child: Row(
                             children: [
                               Icon(
-                                _isSaved
+                                post.isSaved
                                     ? Icons.bookmark
                                     : Icons.bookmark_border,
                                 size: 18,
-                                color: _isSaved
+                                color: post.isSaved
                                     ? colorScheme.primary
                                     : colorScheme.onSurface.withOpacity(0.5),
                               ),
@@ -301,10 +274,11 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                               Text(
                                 'حفظ',
                                 style: TextStyle(
-                                  color: _isSaved
+                                  color: post.isSaved
                                       ? colorScheme.primary
-                                      : colorScheme.onSurface.withOpacity(0.7),
-                                  fontWeight: _isSaved
+                                      : colorScheme.onSurface
+                                          .withOpacity(0.7),
+                                  fontWeight: post.isSaved
                                       ? FontWeight.bold
                                       : FontWeight.normal,
                                 ),

@@ -1,11 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/core/database/auth_storage.dart';
+import 'package:mafqood/core/services/service_locator.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:mafqood/features/auth/presentation/cubit/auth_state.dart';
 import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
+import 'package:mafqood/features/chat/presentation/cubit/chat_cubit.dart';
 import 'package:mafqood/features/main/presentation/main_shell_page.dart';
+import 'package:mafqood/features/posts/data/services/post_interaction_hub_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -44,6 +46,12 @@ class _SplashPageState extends State<SplashPage>
     final isLoggedIn =
         context.read<AuthCubit>().state.status == AuthStatus.authenticated;
     if (isLoggedIn) {
+      // Connect SignalR hubs with the stored JWT
+      final token = await getIt<AuthStorage>().getToken();
+      if (token != null && mounted) {
+        context.read<ChatCubit>().connectHub(token);
+        getIt<PostInteractionHubService>().connect(token);
+      }
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => MainShellPage()));

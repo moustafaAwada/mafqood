@@ -39,7 +39,7 @@ void callbackDispatcher() {
         );
 
         final remote = AccountRemoteDataSourceImpl(api: apiConsumer);
-        final repository = AccountRepositoryImpl(remote: remote);
+        final repository = AccountRepositoryImpl(remote: remote, authStorage: authStorage);
 
         final result = await repository.updateLocation(
           latitude: position.latitude,

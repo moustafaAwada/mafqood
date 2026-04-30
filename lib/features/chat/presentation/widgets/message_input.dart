@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onSendMessage;
+  final VoidCallback? onTyping;
 
   const MessageInput({
     super.key,
     required this.controller,
     required this.onSendMessage,
+    this.onTyping,
   });
 
   @override
@@ -30,11 +32,12 @@ class _MessageInputState extends State<MessageInput> {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
-          top: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
+          top: BorderSide(
+              color: theme.dividerColor.withValues(alpha: 0.1)),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -43,14 +46,16 @@ class _MessageInputState extends State<MessageInput> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.add_circle_outline, color: colorScheme.primary),
+            icon: Icon(Icons.add_circle_outline,
+                color: colorScheme.primary),
             onPressed: () {},
           ),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                color: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: TextField(
@@ -59,11 +64,13 @@ class _MessageInputState extends State<MessageInput> {
                 decoration: InputDecoration(
                   hintText: 'اكتب رسالتك...',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurface.withOpacity(0.4),
+                    color:
+                        colorScheme.onSurface.withValues(alpha: 0.4),
                     fontSize: 14,
                   ),
                   border: InputBorder.none,
                 ),
+                onChanged: (_) => widget.onTyping?.call(),
                 onSubmitted: (_) => widget.onSendMessage(),
               ),
             ),

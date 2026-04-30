@@ -24,11 +24,21 @@ import 'package:mafqood/core/services/location_sync_service.dart';
 import 'package:mafqood/features/account/data/datasources/account_remote_data_source_impl.dart';
 import 'package:mafqood/features/account/data/repositories/account_repository_impl.dart';
 import 'package:mafqood/features/account/domain/repositories/account_repository.dart';
+import 'package:mafqood/features/account/domain/usecases/update_user_profile_use_case.dart';
 import 'package:mafqood/features/account/presentation/cubit/account_cubit.dart';
 import 'package:mafqood/features/posts/data/datasources/post_remote_data_source_impl.dart';
 import 'package:mafqood/features/posts/data/repositories/post_repository_impl.dart';
 import 'package:mafqood/features/posts/domain/repositories/post_repository.dart';
 import 'package:mafqood/features/posts/presentation/cubit/post_feed_cubit.dart';
+import 'package:mafqood/features/chat/data/datasources/chat_remote_data_source_impl.dart';
+import 'package:mafqood/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:mafqood/features/chat/domain/repositories/chat_repository.dart';
+import 'package:mafqood/features/chat/data/services/chat_hub_service.dart';
+import 'package:mafqood/features/chat/presentation/cubit/chat_cubit.dart';
+import 'package:mafqood/features/chat/presentation/pages/chat_conversation_page.dart';
+import 'package:mafqood/features/posts/data/services/post_interaction_hub_service.dart';
+import 'package:mafqood/features/posts/presentation/pages/post_details_page.dart';
+import 'package:mafqood/features/posts/presentation/pages/user_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +80,7 @@ class MafqoodApp extends StatelessWidget {
             );
             return AccountRepositoryImpl(
               remote: AccountRemoteDataSourceImpl(api: apiConsumer),
+              authStorage: authStorage,
             );
           },
         ),
@@ -86,6 +97,19 @@ class MafqoodApp extends StatelessWidget {
             );
           },
         ),
+        RepositoryProvider<ChatRepository>(
+          create: (_) {
+            final authStorage = getIt<AuthStorage>();
+            final dio = Dio();
+            final apiConsumer = DioConsumer(
+              dio: dio,
+              interceptors: [AuthInterceptor(dio: dio, authStorage: authStorage)],
+            );
+            return ChatRepositoryImpl(
+              remote: ChatRemoteDataSourceImpl(api: apiConsumer),
+            );
+          },
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -95,11 +119,22 @@ class MafqoodApp extends StatelessWidget {
           ),
           BlocProvider<AccountCubit>(
             create: (context) => AccountCubit(
-                accountRepository: context.read<AccountRepository>()),
+              accountRepository: context.read<AccountRepository>(),
+              updateUserProfileUseCase: UpdateUserProfileUseCase(context.read<AccountRepository>()),
+            ),
           ),
           BlocProvider<PostFeedCubit>(
-            create: (context) =>
-                PostFeedCubit(postRepository: context.read<PostRepository>()),
+            create: (context) => PostFeedCubit(
+              repository: context.read<PostRepository>(),
+              hubService: getIt<PostInteractionHubService>(),
+            ),
+          ),
+          BlocProvider<ChatCubit>(
+            create: (context) => ChatCubit(
+              repository: context.read<ChatRepository>(),
+              hubService: getIt<ChatHubService>(),
+              cacheHelper: getIt<CacheHelper>(),
+            ),
           ),
           BlocProvider<ThemeCubit>(create: (context) => ThemeCubit()),
         ],
@@ -121,6 +156,20 @@ class MafqoodApp extends StatelessWidget {
                 OtpPage.routeName: (ctx) =>
                     // Since OtpPage requires 'email', we extract it from settings arguments if passed, otherwise default to empty.
                     OtpPage(email: ModalRoute.of(ctx)!.settings.arguments as String? ?? ''),
+                '/post-details': (ctx) => PostDetailsPage(
+                  postId: ModalRoute.of(ctx)!.settings.arguments as int,
+                ),
+                '/user-profile': (ctx) => UserProfileScreen(
+                  userId: ModalRoute.of(ctx)!.settings.arguments as String,
+                ),
+                '/chat-conversation': (ctx) {
+                  final args = ModalRoute.of(ctx)!.settings.arguments as Map<String, dynamic>;
+                  return ChatConversationPage(
+                    chatRoomId: args['chatRoomId'] as int,
+                    recipientId: args['recipientId'] as String,
+                    contactName: args['contactName'] as String,
+                  );
+                },
               },
             );
           },

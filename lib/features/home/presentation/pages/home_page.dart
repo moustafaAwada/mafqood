@@ -5,7 +5,6 @@ import 'package:mafqood/features/home/presentation/pages/create_post_page.dart'
 import 'package:mafqood/features/home/presentation/widgets/post_card.dart';
 import 'package:mafqood/features/home/presentation/widgets/post_type_option.dart';
 import 'package:mafqood/features/home/presentation/widgets/status_chip.dart';
-import 'package:mafqood/features/posts/domain/entities/post_entities.dart';
 import 'package:mafqood/features/posts/presentation/cubit/post_feed_cubit.dart';
 import 'package:mafqood/features/posts/presentation/cubit/post_feed_state.dart';
 
@@ -292,7 +291,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                if (state.isLoading || state.isRefreshing)
+                if (state.isLoadingPosts || state.isRefreshing)
                   const Center(child: CircularProgressIndicator())
                 else if (state.filteredPosts.isEmpty)
                   Center(
@@ -318,31 +317,7 @@ class _HomePageState extends State<HomePage> {
                   ...state.filteredPosts.map(
                     (post) => Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: PostCard(
-                        postId: post.id,
-                        statusLabel:
-                            post.type == PostType.lost ? 'مفقود' : 'موجود',
-                        statusColor: post.type == PostType.lost
-                            ? const Color(0xFFFF5252)
-                            : const Color(0xFF4CAF50),
-                        name: post.userName ?? 'مستخدم',
-                        subtitle: post.description ?? '',
-                        initialLikes: post.likesCount,
-                        initialDislikes: post.dislikesCount,
-                        initialComments: post.commentsCount,
-                        initialIsSaved: post.isSaved,
-                        initialReactType: post.userReactType,
-                        onReact: (reactType) =>
-                            context.read<PostFeedCubit>().toggleReact(
-                                  postId: post.id,
-                                  reactType: reactType,
-                                ),
-                        onToggleSave: (isSaved) =>
-                            context.read<PostFeedCubit>().toggleSave(
-                                  postId: post.id,
-                                  isSaved: isSaved,
-                                ),
-                      ),
+                      child: PostCard(post: post),
                     ),
                   ),
                 const SizedBox(height: 20),

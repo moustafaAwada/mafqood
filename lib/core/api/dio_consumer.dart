@@ -8,6 +8,9 @@ class DioConsumer extends ApiConsumer {
 
   DioConsumer({required this.dio, List<Interceptor>? interceptors}) {
     dio.options.baseUrl = EndPoints.baseUrl;
+    dio.options.connectTimeout = const Duration(seconds: 15);
+    dio.options.receiveTimeout = const Duration(seconds: 15);
+    dio.options.sendTimeout = const Duration(seconds: 15);
 
     dio.interceptors.add(
       LogInterceptor(
@@ -49,7 +52,7 @@ class DioConsumer extends ApiConsumer {
     try {
       final response = await dio.post(
         path,
-        data: isFormData ? FormData.fromMap(data) : data,
+        data: data,
         queryParameters: queryParameters,
       );
       return response.data;
@@ -68,7 +71,7 @@ class DioConsumer extends ApiConsumer {
     try {
       final response = await dio.put(
         path,
-        data: isFormData ? FormData.fromMap(data) : data,
+        data: data,
         queryParameters: queryParameters,
       );
       return response.data;
@@ -87,7 +90,7 @@ class DioConsumer extends ApiConsumer {
     try {
       final response = await dio.patch(
         path,
-        data: isFormData ? FormData.fromMap(data) : data,
+        data: data,
         queryParameters: queryParameters,
       );
       return response.data;
@@ -106,7 +109,7 @@ class DioConsumer extends ApiConsumer {
     try {
       final response = await dio.delete(
         path,
-        data: isFormData ? FormData.fromMap(data) : data,
+        data: data,
         queryParameters: queryParameters,
       );
       return response.data;

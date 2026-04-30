@@ -27,10 +27,8 @@ class _ChatUser {
 
 class _CreatePostPageState extends State<CreatePostPage> {
   final _textController = TextEditingController();
-  final _locationController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   XFile? _selectedImage;
-  bool _autoDetectLocation = false;
   bool _isSubmitting = false;
 
   final _ChatUser _currentUser = _ChatUser(
@@ -52,7 +50,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
   @override
   void dispose() {
     _textController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -81,9 +78,33 @@ class _CreatePostPageState extends State<CreatePostPage> {
       );
     }
 
-    return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
-    );
+    try {
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+    } catch (e) {
+      // If it times out or fails, try to use the last known position
+      final lastPosition = await Geolocator.getLastKnownPosition();
+      if (lastPosition != null) return lastPosition;
+      
+      // If absolutely no location is available (e.g. emulator without GPS set),
+      // we return a default position instead of blocking the user from posting.
+      return Position(
+        longitude: 0.0,
+        latitude: 0.0,
+        timestamp: DateTime.now(),
+        accuracy: 0.0,
+        altitude: 0.0,
+        altitudeAccuracy: 0.0,
+        heading: 0.0,
+        headingAccuracy: 0.0,
+        speed: 0.0,
+        speedAccuracy: 0.0,
+      );
+    }
   }
 
   Future<void> _pickImage() async {
@@ -128,39 +149,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
     if (_isSubmitting) return;
 
     final description = _textController.text.trim();
-    final locationName = _locationController.text.trim();
 
+    // ── Validation ──────────────────────────────────────────────────────
     if (description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'الرجاء كتابة وصف المنشور قبل المتابعة.',
-            style: TextStyle(fontFamily: 'Cairo'),
-          ),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
+      _showValidationError('الرجاء كتابة وصف المنشور قبل المتابعة.');
       return;
     }
 
-    if (!_autoDetectLocation && locationName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'الرجاء إدخال المدينة أو المنطقة إذا لم يتم تحديد الموقع تلقائيًا.',
-            style: TextStyle(fontFamily: 'Cairo'),
-          ),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
+    if (_selectedImage == null) {
+      _showValidationError('يرجى إرفاق صورة للمنشور.');
       return;
     }
 
@@ -169,22 +166,28 @@ class _CreatePostPageState extends State<CreatePostPage> {
     });
 
     try {
-      double? latitude;
-      double? longitude;
-      String? location = locationName.isNotEmpty ? locationName : null;
+      double latitude;
+      double longitude;
 
-      if (_autoDetectLocation) {
+      try {
         final position = await _determinePosition();
         latitude = position.latitude;
         longitude = position.longitude;
+      } catch (locError) {
+        if (mounted) {
+          _showValidationError('يرجى تفعيل الموقع للصلاحيات: $locError');
+          setState(() => _isSubmitting = false);
+        }
+        return;
       }
 
+      // Note: Since we want the Feed to update automatically, we should use PostFeedCubit if provided,
+      // or we just call the repository. Here we call the repo, and the caller (HomePage) will probably refresh.
       final result = await context.read<PostRepository>().createPost(
         description: description,
         type: _postTypeToInt(widget.postType),
         latitude: latitude,
         longitude: longitude,
-        locationName: location,
         imagePath: _selectedImage?.path,
       );
 
@@ -218,6 +221,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
               ),
             ),
           );
+          // Return true to signal that a new post was created so the parent can refresh
           Navigator.pop(context, true);
         },
       );
@@ -242,6 +246,22 @@ class _CreatePostPageState extends State<CreatePostPage> {
         });
       }
     }
+  }
+
+  void _showValidationError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'Cairo'),
+        ),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 
   @override
@@ -451,75 +471,26 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-
-                    // ── Location section ──
-                    _SectionTitle(title: 'الموقع'),
-                    const SizedBox(height: 12),
+                    // ── Location will be attached automatically ──
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: colorScheme.surface,
+                        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: theme.dividerColor.withOpacity(0.1),
-                        ),
                       ),
-                      child: Column(
+                      child: Row(
                         children: [
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: Icon(
-                              Icons.location_on_outlined,
-                              color: colorScheme.primary,
-                            ),
-                            title: Text(
-                              'تحديد الموقع تلقائيا',
+                          Icon(Icons.location_on, color: colorScheme.primary, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'سيتم إرفاق موقعك الحالي تلقائياً مع المنشور.',
                               style: TextStyle(
-                                fontSize: 14,
-                                color: colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                                color: colorScheme.onSurface.withOpacity(0.7),
                               ),
-                            ),
-                            trailing: Switch.adaptive(
-                              value: _autoDetectLocation,
-                              activeColor: colorScheme.primary,
-                              onChanged: (val) {
-                                setState(() => _autoDetectLocation = val);
-                              },
                             ),
                           ),
-                          if (!_autoDetectLocation)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: TextField(
-                                controller: _locationController,
-                                textDirection: TextDirection.rtl,
-                                decoration: InputDecoration(
-                                  hintText: 'ادخل اسم المدينة او المنطقة...',
-                                  hintStyle: TextStyle(
-                                    color: colorScheme.onSurface.withOpacity(
-                                      0.3,
-                                    ),
-                                    fontSize: 13,
-                                  ),
-                                  filled: true,
-                                  fillColor: colorScheme.surfaceContainerHighest
-                                      .withOpacity(0.3),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),

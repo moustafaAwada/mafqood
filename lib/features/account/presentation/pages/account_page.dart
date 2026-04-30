@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mafqood/features/account/presentation/cubit/account_cubit.dart';
+import 'package:mafqood/features/account/presentation/cubit/account_state.dart';
 import 'package:mafqood/features/account/presentation/pages/donation_page.dart';
 import 'package:mafqood/features/account/presentation/pages/edit_profile_page.dart';
 import 'package:mafqood/features/account/presentation/pages/family_care_page.dart';
@@ -11,16 +13,38 @@ import 'package:mafqood/features/auth/presentation/pages/login_page.dart';
 import 'package:mafqood/features/account/presentation/widgets/account_item.dart';
 import 'package:mafqood/features/account/presentation/widgets/logout_button.dart';
 import 'package:mafqood/features/account/presentation/widgets/profile_card.dart';
+import 'package:mafqood/features/chat/presentation/cubit/chat_cubit.dart';
+import 'package:mafqood/core/services/service_locator.dart';
+import 'package:mafqood/features/posts/data/services/post_interaction_hub_service.dart';
 
-class AccountPage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
+
+  @override
+  State<AccountPage> createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch fresh user profile from API when page opens
+    context.read<AccountCubit>().fetchCurrentUserProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
+    return BlocListener<AccountCubit, AccountState>(
+      listener: (context, state) {
+        if (state is UpdateProfileSuccess || state is AccountLoaded) {
+          // Refresh ProfileCard when profile is updated
+          // The ProfileCard will automatically reload from AuthStorage
+        }
+      },
+      child: Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: colorScheme.primary,
@@ -110,6 +134,9 @@ class AccountPage extends StatelessWidget {
             // ── Logout ──
             LogoutButton(
               onPressed: () async {
+                // Disconnect SignalR hubs before logout
+                await context.read<ChatCubit>().disconnectHub();
+                await getIt<PostInteractionHubService>().disconnect();
                 await context.read<AuthCubit>().logout();
                 if (!context.mounted) return;
                 Navigator.of(context).pushNamedAndRemoveUntil(
@@ -122,6 +149,7 @@ class AccountPage extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

@@ -1,4 +1,15 @@
+import 'package:mafqood/core/api/end_points.dart';
 import 'package:mafqood/features/posts/domain/entities/post_entities.dart';
+
+String? _getFullUrl(String? url) {
+  if (url == null || url.isEmpty) return null;
+  if (url.startsWith('http')) return url;
+  final baseUrl = EndPoints.baseUrl.endsWith('/') 
+      ? EndPoints.baseUrl.substring(0, EndPoints.baseUrl.length - 1) 
+      : EndPoints.baseUrl;
+  final path = url.startsWith('/') ? url : '/$url';
+  return '$baseUrl$path';
+}
 
 PostType _mapPostType(int value) => value == 1 ? PostType.found : PostType.lost;
 
@@ -34,8 +45,8 @@ class PostItemModel extends PostItem {
       id: json['id'] as int,
       userId: (json['userId'] ?? '') as String,
       userName: json['userName'] as String?,
-      userProfilePictureUrl: json['userProfilePictureUrl'] as String?,
-      imageUrl: json['imageUrl'] as String?,
+      userProfilePictureUrl: _getFullUrl(json['userProfilePictureUrl'] as String?),
+      imageUrl: _getFullUrl(json['imageUrl'] as String?),
       description: json['description'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0,
